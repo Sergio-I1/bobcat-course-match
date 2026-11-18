@@ -579,6 +579,51 @@
     .qi .ic{width:30px;height:30px;font-size:14px}
     .mascot{animation:none}
   }
+
+  /* ---------- v12: quiz nav, smoother questions, save area ---------- */
+  .brand{cursor:pointer}
+  .qnav{display:flex;justify-content:space-between;align-items:center;margin:-8px 0 12px}
+  .qarrows{display:flex;gap:8px}
+  .qbtn{border:2px solid var(--line);background:#fff;color:var(--maroon);font-weight:800;font-size:14px;border-radius:99px;padding:6px 14px;
+    box-shadow:0 3px 0 var(--line);transition:transform .12s,border-color .12s}
+  .qbtn:hover{border-color:var(--gold)}
+  .qbtn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--line)}
+  .qbtn.qa{width:42px;height:38px;padding:0;font-size:18px;display:grid;place-items:center}
+  .qbtn:disabled{opacity:.35;cursor:default;transform:none}
+  /* gentle in/out instead of a big slide */
+  .stage.in > *{animation:qin .3s ease-out both!important}
+  .stage.in > .qnav{animation:none!important}
+  .stage.leaving > *:not(.qnav){opacity:0;transform:translateY(-6px);transition:opacity .14s ease,transform .14s ease}
+  @keyframes qin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .q-emoji{animation:none}
+  /* save hint + save area */
+  .savehint{display:flex;justify-content:flex-end;margin:-6px 0 -4px}
+  .savebtn{border:0;background:var(--maroon);color:#fff;font-weight:800;font-size:14.5px;padding:9px 16px;border-radius:99px;box-shadow:0 4px 0 #45090d;cursor:pointer}
+  .savebtn:active{transform:translateY(3px);box-shadow:0 1px 0 #45090d}
+  .savebtn .down{display:inline-block;animation:bobdown 1.4s ease-in-out infinite}
+  @keyframes bobdown{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}
+  .savegrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px}
+  .savebig{display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;border:2px solid var(--line);background:#fffaf2;
+    border-radius:20px;padding:16px 12px;cursor:pointer;font:inherit;color:var(--ink);box-shadow:0 5px 0 var(--line);transition:transform .12s,border-color .12s}
+  .savebig:hover{border-color:var(--gold)}
+  .savebig:active{transform:translateY(3px);box-shadow:0 2px 0 var(--line)}
+  .savebig:disabled{opacity:.6}
+  .savebig .se{font-size:34px}
+  .savebig b{font-family:"Baloo 2",sans-serif;font-size:19px;color:var(--maroon)}
+  .savebig small{font-size:13px;color:var(--muted);font-weight:700}
+  .savecard.flash{animation:flash 1.2s ease}
+  @keyframes flash{0%,100%{box-shadow:0 12px 34px rgba(107,26,31,.06)}35%{box-shadow:0 0 0 5px var(--gold),0 12px 34px rgba(107,26,31,.1)}}
+  @media (max-width:700px){
+    .qnav{margin:-4px 0 10px}
+    .qbtn{font-size:13px;padding:5px 12px}
+    .savehint{justify-content:center;margin:0}
+    .savebtn{width:100%;padding:12px}
+    .savegrid{grid-template-columns:1fr}
+    .savebig{flex-direction:row;text-align:left;gap:12px;padding:14px}
+    .savebig .se{font-size:30px}
+    .savebig small{display:block}
+    .stage.in > *{animation:qin .26s ease-out both!important}
+  }
   @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -835,7 +880,25 @@ function isDone(i){
 }
 const doneCount = () => STEPS.filter((_,i)=>isDone(i)).length;
 
+let moving = false;
 function go(step,i,animate=true){
+  // question → question: fade the old one out first, keep the card the same height, then fade the new one in
+  const oldStage = app.querySelector(".stage");
+  if(animate && step==="quiz" && state.step==="quiz" && oldStage && !moving &&
+     !(window.matchMedia && matchMedia("(prefers-reduced-motion:reduce)").matches)){
+    moving = true;
+    const hgt = oldStage.offsetHeight;
+    oldStage.classList.add("leaving");
+    setTimeout(()=>{
+      moving = false;
+      state.step=step; if(i!==undefined) state.i=i;
+      render(true);
+      const ns = app.querySelector(".stage");
+      if(ns){ ns.style.minHeight = hgt+"px"; setTimeout(()=>{ ns.style.minHeight=""; }, 320); }
+      if(ns && ns.getBoundingClientRect().top < 0) ns.scrollIntoView({block:"start", behavior:"smooth"});
+    }, 150);
+    return;
+  }
   state.step=step; if(i!==undefined) state.i=i;
   render(animate);
   if(!animate) return;
@@ -845,7 +908,27 @@ function go(step,i,animate=true){
     if(card && card.getBoundingClientRect().top < 0) card.scrollIntoView({block:"start", behavior:"smooth"});
   } else window.scrollTo({top:0, behavior:"smooth"});
 }
+/* ---- remember progress in this browser (so a refresh doesn't lose it) ---- */
+const SAVE_KEY = "bobcat-course-match-progress";
+function saveProgress(){
+  try{ localStorage.setItem(SAVE_KEY, JSON.stringify({step:state.step, i:state.i, answers:state.answers,
+        role:state.role, certs:state.certs, interests:[...state.interests]})); }catch(e){}
+}
+function loadProgress(){
+  try{
+    const s = JSON.parse(localStorage.getItem(SAVE_KEY)||"null");
+    if(!s || !Array.isArray(s.answers) || s.answers.length!==NQ) return;
+    state.answers = s.answers; state.role = s.role||null; state.certs = (s.certs===0||s.certs)?s.certs:null;
+    state.interests = new Set(s.interests||[]);
+    state.i = Math.min(Math.max(+s.i||0,0), TOTAL-1);
+    // only reopen results if every question was answered
+    state.step = s.step==="results" ? (doneCount()===TOTAL ? "results" : "quiz") : (s.step==="quiz" ? "quiz" : "home");
+  }catch(e){}
+}
+function clearProgress(){ try{ localStorage.removeItem(SAVE_KEY); }catch(e){} }
+
 function render(animate){
+  saveProgress();
   document.querySelectorAll(".navb").forEach(b=>b.classList.toggle("on", b.dataset.page===state.page));
   if(state.page==="all") return allPage();
   if(state.step==="home") return home();
@@ -859,7 +942,6 @@ function certbar(){
       <div class="seal">🏅</div>
       <div class="cb-main"><b class="t">Earn a certificate. Show it off.</b>
         <div class="chips2"><span>💼 LinkedIn</span><span>📄 Résumé</span><span>🗂️ Portfolio</span></div></div>
-      <a class="btn" href="${LOGIN[state.role]||LOGIN.student}" target="_blank" rel="noopener">🔑 Log in free with TXST</a>
     </div>`;
 }
 
@@ -877,7 +959,7 @@ function home(){
   <div style="margin-bottom:20px">${certbar()}</div>
   <div class="card hero">
     <div>
-      <h1>Free Coursera courses, picked for <em>you</em>.</h1>
+      <h1>See which free Coursera courses fit <em>you</em> best.</h1>
       <button class="btn" id="start">Start 🚀</button>
       <p class="small muted" style="margin-top:16px">⏱️ 3 min</p>
     </div>
@@ -886,7 +968,7 @@ function home(){
   <div class="steps">
     <div class="step"><div class="e">👆</div>Tap answers</div>
     <div class="step"><div class="e">📊</div>See your skills</div>
-    <div class="step"><div class="e">🎯</div>Get your courses</div>
+    <div class="step"><div class="e">🎯</div>See your best courses</div>
   </div>
   ${browseAll()}`;
   wireBrowse();
@@ -933,12 +1015,22 @@ function quiz(animate){
       <ol class="qlist">${list}</ol>
     </aside>
     <section class="card stage ${animate?"in":""}">
+      <div class="qnav">
+        <button class="qbtn" type="button" data-home>🏠 Home</button>
+        <span class="qarrows">
+          <button class="qbtn qa" type="button" data-prev ${i===0?"disabled":""} aria-label="Previous question">←</button>
+          <button class="qbtn qa" type="button" data-next ${i>=TOTAL-1?"disabled":""} aria-label="Next question">→</button>
+        </span>
+      </div>
       ${body}
 
     </section></div>`;
 
   app.querySelectorAll(".opt").forEach(b=>b.onclick=()=>pick(b.dataset.v));
   app.querySelectorAll(".qi").forEach(b=>b.onclick=()=>go("quiz",+b.dataset.go));
+  app.querySelector("[data-home]").onclick = ()=>go("home");
+  app.querySelector("[data-prev]").onclick = ()=>{ if(state.i>0) go("quiz",state.i-1); };
+  app.querySelector("[data-next]").onclick = ()=>{ if(state.i<TOTAL-1) go("quiz",state.i+1); };
   const f=document.getElementById("finish"); if(f) f.onclick=()=>{
     track("finished/"+(state.role||"unknown"));
     const label = id => (INTERESTS.find(t=>t.id===id)||{label:id}).label.replace(/^\S+\s/,"");
@@ -973,7 +1065,12 @@ function updateInterests(val){
   const cnt = app.querySelector(".side .count"); if(cnt) cnt.textContent = `${n} / ${TOTAL}`;
   const bar = app.querySelector(".track i"); if(bar) bar.style.width = (n/TOTAL*100)+"%";
   const f = document.getElementById("finish"); if(f) f.disabled = !all;
+  saveProgress();
 }
+
+/* scores are kept 0–100 inside, but shown to people on a 1–10 scale (one decimal) */
+const ten  = v => (1 + v*0.09).toFixed(1);          // 0 → 1.0, 100 → 10.0
+const tenG = g => (g*0.09).toFixed(1);              // how much a course could add, on the same scale
 
 /* ---- scoring: each skill = average of its answers, turned into 0–100 ---- */
 function scores(){
@@ -1054,8 +1151,8 @@ function card(c,x,sc,rank){
   // the 2 skills where this helps most, shown as big "+points" tiles
   const tiles = c.builds.slice().sort((a,b)=>gain(c,b,sc)-gain(c,a,sc)).slice(0,2).map(s=>{
     const g = gain(c,s,sc);
-    return `<div class="boost" title="${SKILLS[s].name}: ${sc[s]} now, about ${sc[s]+g} after">
-      <span class="be">${SKILLS[s].e}</span><span class="bn">${g>0?`<small>▲</small>+${g}`:"💯"}</span><span class="bl">${SKILLS[s].name}</span></div>`;
+    return `<div class="boost" title="${SKILLS[s].name}: ${ten(sc[s])} now, about ${ten(sc[s]+g)} after (out of 10)">
+      <span class="be">${SKILLS[s].e}</span><span class="bn">${g>0?`<small>▲</small>+${tenG(g)}`:"💯"}</span><span class="bl">${SKILLS[s].name}</span></div>`;
   }).join("");
   const earnIcon = {badge:"🏅", certificate:"📜"}[c.earns];
   return `<a class="pick" href="${c.url}" target="_blank" rel="noopener" style="--c:${col[0]};--soft:${col[1]};animation-delay:${.12*x+.2}s">
@@ -1090,7 +1187,7 @@ function results(){
     const cls = sc[s]>=70?"high":sc[s]<45?"low":"";
     const word = sc[s]>=70?"💪 Strength":sc[s]<45?"🌱 Could work on":"👍 Solid";
     return `<div class="vcol">
-      <div class="vtrack ${cls}"><i data-h="${Math.max(sc[s],2)}"></i><b data-h="${sc[s]}" class="${sc[s]>=85?"inside":""}">${sc[s]}</b></div>
+      <div class="vtrack ${cls}"><i data-h="${Math.max(sc[s],2)}"></i><b data-h="${sc[s]}" class="${sc[s]>=85?"inside":""}">${ten(sc[s])}</b></div>
       <div class="vname"><span class="ve">${SKILLS[s].e}</span><span class="long">${SKILLS[s].name}</span><span class="short">${SKILLS[s].short}</span></div>
       <div class="vword">${word}</div></div>`;
   }).join("");
@@ -1104,15 +1201,17 @@ function results(){
     </div>` : "";
 
   app.innerHTML = `<div class="results">
+    <div class="savehint"><button class="savebtn" id="tosave" type="button">💾 Save your results <span class="down">↓</span></button></div>
     ${certbar()}
 
     <div class="card">
       <h2>🎉 Your skills</h2>
-      <div class="vchart"><div class="maxline"><span>100 = max 🚀</span></div>${chart}</div>
+      <div class="vchart">${chart}</div>
+      <p class="small muted" style="margin:10px 0 0;text-align:center">Scores are out of 10.</p>
     </div>
 
     <div class="card">
-      <h2>🎯 Your Coursera picks</h2>
+      <h2>🎯 Courses that fit you best</h2>
       <div class="picks">${best.map((c,x)=>card(c,x,sc,medals[x])).join("")}</div>
     </div>
 
@@ -1123,16 +1222,20 @@ function results(){
     </div>
     ${gaps.length?`<div class="card"><h2>🤷 Not on our list yet</h2>
       <div class="gapbtns">${gaps.map(g=>`<a class="btn ghost" href="${CS(g.label.replace(/^\S+\s/,""))}" target="_blank" rel="noopener">${esc(g.label)} 🔎</a>`).join("")}</div></div>`:""}
-    <div class="card">
-      <div class="pdfrow"><span class="pe">📄</span><b>Want a PDF of your top picks?</b><button class="btn" id="pdf">Make my PDF</button></div>
-      <div class="acts"><button class="btn ghost" id="copy">📋 Copy</button>
+    <div class="card savecard" id="save">
+      <h2>💾 Save your results</h2>
+      <div class="savegrid">
+        <button class="savebig" id="pdf" type="button"><span class="se">📄</span><b>Download PDF</b><small>Your skills + courses, with links you can tap</small></button>
+        <button class="savebig" id="copy" type="button"><span class="se">📋</span><b>Copy with links</b><small>Paste it in your notes or a text</small></button>
+      </div>
+      <div class="acts" style="margin-top:14px">
       <button class="btn ghost" id="edit">✏️ Edit answers</button>
       <button class="btn ghost" id="again">🔄 Restart</button><span class="toast" id="toast"></span></div>
       <details>
         <summary>For program staff</summary>
         <p class="small" style="margin-top:8px">Texas State already pays for Coursera, but people have to go looking and guess which of thousands of courses fits. This tool flips that: a short self-check scores six skill areas, then points each person to the specific courses that fill their gap. It gives learners a personal reason to log in and enroll.</p>
         <p class="small">It also shows demand. Each interest with no matching course is flagged, so collected at scale this becomes a list of what to add or promote next.</p>
-        <p class="small muted">Scores are self-reported: two questions per skill, averaged and scaled 0–100. The "+points" on each card are a simple estimate (up to +25 for a course's main skill, +15 for others), not measured results. Hours are rough estimates too; check each course page. Courses marked ✓ TXST were listed on TXST's Coursera page; the rest are on Coursera and should be checked against TXST's free catalog. 📜 = earns a certificate, 🏅 = earns a badge.</p>
+        <p class="small muted">Scores are self-reported: two questions per skill, averaged and shown on a 1–10 scale. The "+" number on each card is a simple estimate (up to +2.3 for a course's main skill, +1.4 for others), not a measured result. Hours are rough estimates too; check each course page. Courses marked ✓ TXST were listed on TXST's Coursera page; the rest are on Coursera and should be checked against TXST's free catalog. 📜 = earns a certificate, 🏅 = earns a badge.</p>
       </details>
     </div>
   </div>`;
@@ -1151,8 +1254,8 @@ function results(){
     const hex = x => [1,3,5].map(i=>parseInt(x.slice(i,i+2),16));
     const item = c => { const s=c.builds[0], g=gain(c,s,sc);
       return {name:c.name, url:c.url, rgb:hex(SKILL_COLOR[c.weakest][0]), soft:hex(SKILL_COLOR[c.weakest][1]),
-        meta:[c.by, hrsText(c), c.earns?"Earns a "+c.earns:"", g>0?`+${g} ${SKILLS[s].name}`:""].filter(Boolean).join("  ·  ")}; };
-    const data = {skills:order.map(s=>({name:SKILLS[s].name, score:sc[s], rgb:hex(SKILL_COLOR[s][0])})),
+        meta:[c.by, hrsText(c), c.earns?"Earns a "+c.earns:"", g>0?`+${tenG(g)} ${SKILLS[s].name}`:""].filter(Boolean).join("  ·  ")}; };
+    const data = {skills:order.map(s=>({name:SKILLS[s].name, score:sc[s], shown:ten(sc[s]), rgb:hex(SKILL_COLOR[s][0])})),
                   coursera:best.map(item), txst:local.map(item)};
     btn.disabled = true; t.textContent = "Making it…";
     try{
@@ -1168,13 +1271,19 @@ function results(){
   };
   document.getElementById("edit").onclick = ()=>go("quiz",0);
   document.getElementById("again").onclick = ()=>{
-    state.answers.fill(null); state.role=null; state.certs=null; state.interests.clear(); go("home");
+    state.answers.fill(null); state.role=null; state.certs=null; state.interests.clear(); state.i=0; clearProgress(); go("home");
+  };
+  document.getElementById("tosave").onclick = ()=>{
+    const box = document.getElementById("save");
+    box.scrollIntoView({behavior:"smooth", block:"center"});
+    box.classList.remove("flash"); void box.offsetWidth; box.classList.add("flash");
   };
   document.getElementById("copy").onclick = async ()=>{
+    track("copy");
     const text = `My Bobcat Course Match results\n`
-      + order.map(s=>`${SKILLS[s].name}: ${sc[s]}/100`).join("\n")
-      + `\n\nCoursera picks:\n` + best.map(c=>`- ${c.name} (${c.by})`).join("\n")
-      + `\n\nTexas State in person:\n` + local.map(c=>`- ${c.name} (${c.by})`).join("\n")
+      + order.map(s=>`${SKILLS[s].name}: ${ten(sc[s])} / 10`).join("\n")
+      + `\n\nCoursera courses that fit me best:\n` + best.map(c=>`- ${c.name} (${c.by})\n  ${c.url}`).join("\n")
+      + `\n\nTexas State in person:\n` + local.map(c=>`- ${c.name} (${c.by})\n  ${c.url}`).join("\n")
       + (gaps.length?`\n\nNo match found for: ${gaps.map(g=>g.label).join("; ")}`:"");
     const t = document.getElementById("toast");
     try{ await navigator.clipboard.writeText(text); t.textContent="Copied! ✅"; }
@@ -1205,7 +1314,7 @@ function buildPdf(jsPDF, d){
     doc.setTextColor(42,31,28); doc.setFont("helvetica","normal"); doc.setFontSize(10.5); doc.text(s.name, M, y+8);
     doc.setFillColor(239,227,216); doc.roundedRect(M+170, y, 300, 10, 5, 5, "F");
     if(s.score>0){ doc.setFillColor(s.rgb[0],s.rgb[1],s.rgb[2]); doc.roundedRect(M+170, y, Math.max(3*s.score,10), 10, 5, 5, "F"); }
-    doc.setFont("helvetica","bold"); doc.text(String(s.score), M+480, y+8); y += 18;
+    doc.setFont("helvetica","bold"); doc.text(s.shown+" / 10", M+480, y+8); y += 18;
   });
   y += 20;
   const list = (title, items) => {
@@ -1213,7 +1322,7 @@ function buildPdf(jsPDF, d){
     h2(title);
     items.forEach((c,i)=>{
       doc.setFont("helvetica","bold"); doc.setFontSize(12);
-      const lines = doc.splitTextToSize(c.name, W-2*M-52), hgt = lines.length*14 + 30;
+      const lines = doc.splitTextToSize(c.name, W-2*M-110), hgt = lines.length*14 + 30;
       if(y+hgt>762){ doc.addPage(); y = 60; }
       doc.setFillColor(c.soft[0],c.soft[1],c.soft[2]); doc.roundedRect(M, y, W-2*M, hgt, 8, 8, "F");
       doc.setFillColor(c.rgb[0],c.rgb[1],c.rgb[2]); doc.circle(M+18, y+18, 10, "F");
@@ -1221,12 +1330,14 @@ function buildPdf(jsPDF, d){
       doc.setTextColor(42,31,28); doc.setFontSize(12); doc.text(lines, M+36, y+19);
       doc.setFont("helvetica","normal"); doc.setFontSize(9.5); doc.setTextColor(110,98,92);
       doc.text(c.meta, M+36, y+19+lines.length*14);
+      doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.setTextColor(c.rgb[0],c.rgb[1],c.rgb[2]);
+      doc.text("Open  >", W-M-12, y+19, {align:"right"});
       doc.link(M, y, W-2*M, hgt, {url:c.url});
       y += hgt + 6;
     });
     y += 8;
   };
-  list("My Coursera picks", d.coursera);
+  list("Coursera courses that fit me best", d.coursera);
   list("On campus at TXST", d.txst);
   if(y>770){ doc.addPage(); y = 60; }
   doc.setTextColor(110,98,92); doc.setFont("helvetica","normal"); doc.setFontSize(9.5);
@@ -1326,6 +1437,9 @@ window.addEventListener("hashchange",()=>{
   if(p!==state.page){ state.page=p; render(true); }
 });
 if(location.hash==="#all-credentials") state.page="all";
+loadProgress();
+/* tapping the name at the top goes back to the start page */
+document.querySelector(".brand").onclick = ()=>{ if(state.page!=="survey") setPage("survey"); go("home"); };
 
 function confetti(){
   if(window.matchMedia && matchMedia("(prefers-reduced-motion:reduce)").matches) return;
