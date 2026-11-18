@@ -508,18 +508,18 @@
     .fdone{display:block;width:100%;margin-top:12px}
 
     /* all courses: table becomes a simple list */
-    .tablewrap{border-radius:18px;overflow:visible;border-width:1.5px}
-    table.grid{min-width:0}
-    .grid thead{display:none}
-    .grid td:not(:first-child){display:none}
-    .grid td:first-child{padding:12px 14px}
-    .grid tr.grp td{display:table-cell;padding:10px 14px;font-size:15px}
-    .grid tbody tr:not(.grp) td:first-child a{font-size:16px;line-height:1.3}
-    .mskills{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0 2px}
-    .mskills span{font-size:12px;font-weight:800;background:#f6efe8;color:#6b5a52;border-radius:99px;padding:2px 9px}
-    .mskills span.main{background:var(--gold-soft);color:#7a5408}
-    .mskills .mearn{background:none;padding:0 2px;font-size:16px}
-    .legend{display:none}
+    .allp:not(.tableview) .tablewrap{border-radius:18px;overflow:visible;border-width:1.5px}
+    .allp:not(.tableview) table.grid{min-width:0}
+    .allp:not(.tableview) .grid thead{display:none}
+    .allp:not(.tableview) .grid td:not(:first-child){display:none}
+    .allp:not(.tableview) .grid td:first-child{padding:12px 14px}
+    .allp:not(.tableview) .grid tr.grp td{display:table-cell;padding:10px 14px;font-size:15px}
+    .allp:not(.tableview) .grid tbody tr:not(.grp) td:first-child a{font-size:16px;line-height:1.3}
+    .allp:not(.tableview) .mskills{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0 2px}
+    .allp:not(.tableview) .mskills span{font-size:12px;font-weight:800;background:#f6efe8;color:#6b5a52;border-radius:99px;padding:2px 9px}
+    .allp:not(.tableview) .mskills span.main{background:var(--gold-soft);color:#7a5408}
+    .allp:not(.tableview) .mskills .mearn{background:none;padding:0 2px;font-size:16px}
+    .allp:not(.tableview) .legend{display:none}
     .allp > p .btn{width:100%}
 
     /* v9 phone tweaks */
@@ -536,21 +536,21 @@
     .fdd summary b{position:absolute;top:-7px;right:-4px;min-width:20px;font-size:11.5px;padding:1px 5px;margin:0}
     .fmeta{margin:10px 2px 4px}
     /* roomier list */
-    .tablewrap{border:0;background:none}
-    table.grid{border-spacing:0 10px}
-    .grid tr.grp td{background:none;color:var(--maroon);padding:14px 4px 0;font-size:17px;border:0}
-    .grid tbody tr:not(.grp) td:first-child{background:#fff;border:1.5px solid #f1e4da;border-radius:18px;padding:12px}
-    .grid tbody tr:not(.grp):hover{background:none}
-    .crow{display:flex;gap:12px;align-items:flex-start}
-    .thumb{display:grid;place-items:center;flex:none;width:64px;height:64px;border-radius:16px;background:var(--soft);position:relative}
-    .thumb svg{width:54px;height:auto}
-    .tbadge{position:absolute;right:-6px;bottom:-6px;width:26px;height:26px;border-radius:50%;background:var(--gold);display:grid;place-items:center;font-size:14px;box-shadow:0 2px 0 #b98a2a}
-    .ctext{min-width:0;flex:1;display:flex;flex-direction:column;gap:5px}
-    .cart{display:none}
-    .grid tbody tr:not(.grp) td:first-child a.cname{font-size:16.5px;line-height:1.3}
-    .ctext .sub{font-size:13px;margin:0}
-    .mskills{margin:2px 0 0}
-    .mskills .mearn{display:none}
+    .allp:not(.tableview) .tablewrap{border:0;background:none}
+    .allp:not(.tableview) table.grid{border-spacing:0 10px}
+    .allp:not(.tableview) .grid tr.grp td{background:none;color:var(--maroon);padding:14px 4px 0;font-size:17px;border:0}
+    .allp:not(.tableview) .grid tbody tr:not(.grp) td:first-child{background:#fff;border:1.5px solid #f1e4da;border-radius:18px;padding:12px}
+    .allp:not(.tableview) .grid tbody tr:not(.grp):hover{background:none}
+    .allp:not(.tableview) .crow{display:flex;gap:12px;align-items:flex-start}
+    .allp:not(.tableview) .thumb{display:grid;place-items:center;flex:none;width:64px;height:64px;border-radius:16px;background:var(--soft);position:relative}
+    .allp:not(.tableview) .thumb svg{width:54px;height:auto}
+    .allp:not(.tableview) .tbadge{position:absolute;right:-6px;bottom:-6px;width:26px;height:26px;border-radius:50%;background:var(--gold);display:grid;place-items:center;font-size:14px;box-shadow:0 2px 0 #b98a2a}
+    .allp:not(.tableview) .ctext{min-width:0;flex:1;display:flex;flex-direction:column;gap:5px}
+    .allp:not(.tableview) .cart{display:none}
+    .allp:not(.tableview) .grid tbody tr:not(.grp) td:first-child a.cname{font-size:16.5px;line-height:1.3}
+    .allp:not(.tableview) .ctext .sub{font-size:13px;margin:0}
+    .allp:not(.tableview) .mskills{margin:2px 0 0}
+    .allp:not(.tableview) .mskills .mearn{display:none}
   }
   @keyframes sheet{from{transform:translateY(100%)}to{transform:none}}
   @keyframes fadein{from{opacity:0}to{opacity:1}}
@@ -628,6 +628,49 @@
     .savebig small{display:block}
     .stage.in > *{animation:qin .26s ease-out both!important}
   }
+
+  /* ---------- v14: list / table switch on phones ---------- */
+  .allhead{display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .viewtog,.turnhint{display:none}
+  .grid th .short{display:none}
+  @media (max-width:700px){
+    .viewtog{display:flex;background:#f6efe8;border-radius:99px;padding:3px;gap:2px;flex:none}
+    .viewtog button{border:0;background:none;font:inherit;font-weight:800;font-size:13.5px;color:var(--muted);padding:7px 12px;border-radius:99px;cursor:pointer}
+    .viewtog button.on{background:#fff;color:var(--maroon);box-shadow:0 2px 6px rgba(107,26,31,.12)}
+    .turnhint{display:block;font-size:13px;font-weight:700;color:#7a5408;background:var(--gold-soft);border-radius:12px;padding:8px 12px;margin:10px 0 0}
+    /* the table, made to fit a phone: course names stay put while you swipe sideways */
+    .allp.tableview .legend{display:none}
+    .allp.tableview .tablewrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:16px;border:1.5px solid #f1e4da}
+    .allp.tableview table.grid{min-width:560px;font-size:13px;border-spacing:0}
+    .allp.tableview .grid th{padding:8px 3px;font-size:11px;vertical-align:bottom}
+    .allp.tableview .grid th .the{font-size:19px}
+    .allp.tableview .grid th .long{display:none}
+    .allp.tableview .grid th .short{display:inline}
+    .allp.tableview .grid td{padding:8px 3px}
+    .allp.tableview .grid th:first-child,.allp.tableview .grid td:first-child{position:sticky;left:0;z-index:2;width:165px;min-width:165px;max-width:165px;padding-left:12px;
+      box-shadow:3px 0 6px -3px rgba(107,26,31,.18)}
+    .allp.tableview .grid th:first-child{background:#8a2a30;z-index:3}
+    .allp.tableview .grid tbody tr:not(.grp) td:first-child{background:#fff}
+    .allp.tableview .grid tr.grp td{position:sticky;left:0;font-size:14px;padding:8px 12px}
+    .allp.tableview .grid td:first-child a{font-size:13.5px;line-height:1.25}
+    .allp.tableview .cart{display:none}
+    .allp.tableview .grid .sub{font-size:11px}
+    .allp.tableview .star{font-size:20px}
+    .allp.tableview .star.s{font-size:12px}
+    .allp.tableview .earnc{font-size:18px}
+  }
+
+  /* phone turned sideways: give the table the room */
+  @media (orientation: landscape) and (max-height: 520px){
+    .nav{position:static;box-shadow:none;margin:0;left:auto;right:auto;bottom:auto}
+    header{padding:8px 16px 4px;justify-content:space-between}
+    main{padding-bottom:20px}
+    .fdd summary{flex-direction:row;min-height:40px;gap:5px;padding:6px 8px}
+    .fdd summary .fe{font-size:16px}
+    .fdd summary .fv{margin:0 0 0 2px}
+    .turnhint{font-size:12px;padding:6px 10px}
+  }
+  @media (max-width:700px){ .allhead h2{white-space:nowrap;font-size:21px} }
   @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -1354,6 +1397,14 @@ function buildPdf(jsPDF, d){
    Inside one filter it's "any of these"; across filters it's "all of these". */
 const F = {topic:new Set(), skill:new Set(), earns:new Set(), time:new Set(), where:new Set()};
 let openF = "";      // which dropdown is open right now
+/* phones: "list" (cards) or "table" (stars). Sideways phones get the table automatically. */
+let viewChoice = "";
+const sideways = window.matchMedia ? matchMedia("(orientation: landscape) and (max-height: 520px)") : null;
+function curView(){ return viewChoice || (sideways && sideways.matches ? "table" : "list"); }
+if(sideways){
+  const onTurn = ()=>{ viewChoice = ""; if(state.page==="all") allPage(); };
+  sideways.addEventListener ? sideways.addEventListener("change", onTurn) : sideways.addListener(onTurn);
+}
 function allPage(){
   const cols = Object.keys(SKILLS);
   const where = c => c.src==="coursera" ? "online" : "campus";
@@ -1377,8 +1428,13 @@ function allPage(){
           </div></div></td>
         ${cols.map(s=>`<td>${c.builds[0]===s?'<span class="star" title="Main skill">⭐</span>':c.builds.includes(s)?'<span class="star s" title="Bonus skill">⭐</span>':""}</td>`).join("")}
         <td class="earnc" title="${EARN[c.earns]?EARN[c.earns].slice(3):"No credential"}">${{badge:"🏅",certificate:"📜"}[c.earns]||"—"}</td></tr>`).join("")).join("");
-  app.innerHTML = `<div class="card allp">
-    <h2>🗂️ All courses</h2>
+  const view = curView();
+  app.innerHTML = `<div class="card allp ${view==="table"?"tableview":""}">
+    <div class="allhead"><h2>🗂️ All courses</h2>
+      <div class="viewtog" role="group" aria-label="View">
+        <button type="button" data-view="list" class="${view==="list"?"on":""}">📋 List</button>
+        <button type="button" data-view="table" class="${view==="table"?"on":""}">⭐ Table</button>
+      </div></div>
     <div class="filters">
       ${dd("topic","✨","Topic",INTERESTS.filter(t=>CATALOG.some(c=>c.tags.includes(t.id))).map(t=>[t.id,t.label]))}
       ${dd("skill","💪","Skill",cols.map(s=>[s,SKILLS[s].e+" "+SKILLS[s].name]))}
@@ -1387,14 +1443,16 @@ function allPage(){
       ${dd("where","📍","Where",[["online","💻 Online (Coursera)"],["campus","🏫 In person (San Marcos)"]])}
     </div>
     <div class="fhint">Filters: tap a box to choose <span class="fv"></span></div>
+    ${view==="list"?'<div class="turnhint">🔄 Turn your phone sideways (or tap ⭐ Table) to see what each course builds.</div>':'<div class="turnhint">👉 Swipe the table sideways. ⭐ = main skill it builds, small ⭐ = bonus skill.</div>'}
     <div class="fmeta"><span class="fcount">${shown.length} of ${CATALOG.length} courses</span>
       ${anyOn?'<button class="fclear" id="fclear">✖ Clear filters</button>':""}</div>
     <div class="legend"><span><span class="star">⭐</span> Main skill</span><span><span class="star s">⭐</span> Bonus skill</span><span>📜 Certificate</span><span>🏅 Badge</span></div>
     ${shown.length ? `<div class="tablewrap"><table class="grid">
-      <thead><tr><th>Course</th>${cols.map(s=>`<th><span class="the">${SKILLS[s].e}</span>${SKILLS[s].name}</th>`).join("")}<th><span class="the">🎁</span>You earn</th></tr></thead>
+      <thead><tr><th>Course</th>${cols.map(s=>`<th><span class="the">${SKILLS[s].e}</span><span class="long">${SKILLS[s].name}</span><span class="short">${SKILLS[s].short}</span></th>`).join("")}<th><span class="the">🎁</span>You earn</th></tr></thead>
       <tbody>${body}</tbody></table></div>` : `<div class="empty">🤷 Nothing matches. Try clearing a filter.</div>`}
     <p style="margin-top:18px"><button class="btn" id="tomatch">🎯 My match</button></p>
   </div>`;
+  app.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>{ viewChoice=b.dataset.view; allPage(); });
   app.querySelectorAll("input[data-f]").forEach(x=>x.onchange=()=>{
     const set = F[x.dataset.f]; x.checked ? set.add(x.value) : set.delete(x.value);
     openF = x.dataset.f; allPage();                       // keep this dropdown open so you can tick more
