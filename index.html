@@ -556,6 +556,29 @@
     .vname{font-size:10px}
     .boosts{flex-direction:column}
   }
+
+  /* ---------- v10: steadier on phones ---------- */
+  button,a,.opt,.qi,summary,label{touch-action:manipulation}
+  @media (max-width:700px){
+    .stage.in > *{animation:fadein .25s ease both}
+    .opt.on{animation:none}
+    #app.slide-r,#app.slide-l{animation:fadein .25s ease both}
+    .q-emoji{font-size:38px;animation:none}
+    .q-kicker{font-size:12px}
+    .q-text{font-size:20px;line-height:1.25}
+    .stage{padding:18px 16px}
+    .faces,.opts{gap:8px;margin-top:14px}
+    .opt{min-height:50px;padding:11px 14px;font-size:15.5px;border-radius:16px}
+    .opts .opt .f,.faces .opt .f{font-size:24px}
+    .chips{gap:7px;margin-top:14px}
+    .chips .opt{min-height:40px;padding:8px 12px;font-size:14px}
+    .side{padding:10px 10px 8px}
+    .side h3{font-size:15px}
+    .track{height:8px;margin-bottom:8px}
+    .qi{min-height:40px;padding:4px}
+    .qi .ic{width:30px;height:30px;font-size:14px}
+    .mascot{animation:none}
+  }
   @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -756,15 +779,15 @@ const hrsText = c => c.hrs>=100 ? "100+ hrs" : "~"+c.hrs+" hrs";
 const hrsBucket = c => HOURS.find(b=>b[2](c.hrs))[0];
 
 /* ============================================================
-   VISIT COUNTER (optional, anonymous)
-   1. Make a free account at goatcounter.com and pick a code, e.g. "bobcatmatch"
-   2. Put that code between the quotes below and upload to GitHub
-   3. See your numbers at https://YOURCODE.goatcounter.com
-   GoatCounter does not use cookies and does not store IP addresses.
-   It only counts visits and the anonymous events below
-   (start, role, finished, interests, no-match topics, course clicks, PDF).
-   Nothing is counted while this is empty.
+   TRAFFIC SHEET (anonymous)
+   Each event is sent to a small Google Apps Script that adds a row to a
+   Google Sheet. Paste the script's web app URL between the quotes.
+   Nothing is sent while it is empty. No names, emails or IP addresses
+   are collected: only the event, what was clicked, the role picked in
+   the quiz (student / staff), and phone vs computer.
    ============================================================ */
+const TRACK_URL = "";
+/* optional second counter: a GoatCounter code (goatcounter.com) */
 const GOATCOUNTER_CODE = "";
 if(GOATCOUNTER_CODE){
   const s = document.createElement("script");
@@ -773,8 +796,23 @@ if(GOATCOUNTER_CODE){
   document.head.appendChild(s);
 }
 function track(name){
+  const cut = name.indexOf("/");
+  const ev = {
+    event:  cut<0 ? name : name.slice(0,cut),
+    detail: cut<0 ? "" : name.slice(cut+1),
+    role:   (typeof state!=="undefined" && state.role) || "",
+    device: (window.matchMedia && matchMedia("(max-width:700px)").matches) ? "phone" : "computer"
+  };
+  try{
+    if(TRACK_URL){
+      const body = JSON.stringify(ev);
+      if(!(navigator.sendBeacon && navigator.sendBeacon(TRACK_URL, body)))
+        fetch(TRACK_URL, {method:"POST", mode:"no-cors", body});
+    }
+  }catch(e){}
   try{ if(window.goatcounter && window.goatcounter.count) window.goatcounter.count({path:name, title:name, event:true}); }catch(e){}
 }
+setTimeout(()=>track("visit"), 0);
 
 /* ============================================================
    4) APP LOGIC
@@ -799,7 +837,13 @@ const doneCount = () => STEPS.filter((_,i)=>isDone(i)).length;
 
 function go(step,i,animate=true){
   state.step=step; if(i!==undefined) state.i=i;
-  render(animate); if(animate) window.scrollTo({top:0,behavior:"smooth"});
+  render(animate);
+  if(!animate) return;
+  if(step==="quiz"){
+    // keep the page still; only move if the question card is hidden above the screen
+    const card = app.querySelector(".stage");
+    if(card && card.getBoundingClientRect().top < 0) card.scrollIntoView({block:"start", behavior:"smooth"});
+  } else window.scrollTo({top:0, behavior:"smooth"});
 }
 function render(animate){
   document.querySelectorAll(".navb").forEach(b=>b.classList.toggle("on", b.dataset.page===state.page));
@@ -897,12 +941,15 @@ function quiz(animate){
   app.querySelectorAll(".qi").forEach(b=>b.onclick=()=>go("quiz",+b.dataset.go));
   const f=document.getElementById("finish"); if(f) f.onclick=()=>{
     track("finished/"+(state.role||"unknown"));
-    state.interests.forEach(t=>track("interest/"+t));
+    const label = id => (INTERESTS.find(t=>t.id===id)||{label:id}).label.replace(/^\S+\s/,"");
+    state.interests.forEach(t=>track("interest/"+label(t)));
     const tags = new Set(CATALOG.flatMap(c=>c.tags));
-    state.interests.forEach(t=>{ if(!tags.has(t)) track("no-match/"+t); });
+    state.interests.forEach(t=>{ if(!tags.has(t)) track("no-match/"+label(t)); });
     go("results");
   };
-  const now=app.querySelector(".qi.now"); if(now&&now.scrollIntoView) now.scrollIntoView({block:"nearest",inline:"center"});
+  const nowDot=app.querySelector(".qi.now"), strip=app.querySelector(".qlist");
+  if(nowDot && strip && strip.scrollWidth > strip.clientWidth)      // phone: center the current dot in the strip
+    strip.scrollLeft = nowDot.offsetLeft - strip.clientWidth/2 + nowDot.offsetWidth/2;
 }
 function opt(face,label,on,v){
   return `<button class="opt ${on?"on":""}" data-v="${v}">${face?`<span class="f">${face}</span>`:""}<span>${esc(label)}</span></button>`;
@@ -912,10 +959,20 @@ function pick(v){
   if(kind==="role"){ state.role=val; track("role/"+val); }
   if(kind==="ans")  state.answers[at-1]=+val;
   if(kind==="cert") state.certs=+val;
-  if(kind==="int"){ state.interests.has(val)?state.interests.delete(val):state.interests.add(val); return render(false); }
+  if(kind==="int"){ state.interests.has(val)?state.interests.delete(val):state.interests.add(val); return updateInterests(val); }
   state.justDone = at;
   render(false);                                   // show the pick + the new checkmark
   setTimeout(()=>{ if(state.step==="quiz" && state.i===at) go("quiz",at+1); },380);   // then slide on
+}
+
+/* update the interest chips, progress and finish button without re-drawing the page */
+function updateInterests(val){
+  const chip = app.querySelector(`.opt[data-v="int:${val}"]`);
+  if(chip) chip.classList.toggle("on", state.interests.has(val));
+  const n = doneCount(), all = n===TOTAL;
+  const cnt = app.querySelector(".side .count"); if(cnt) cnt.textContent = `${n} / ${TOTAL}`;
+  const bar = app.querySelector(".track i"); if(bar) bar.style.width = (n/TOTAL*100)+"%";
+  const f = document.getElementById("finish"); if(f) f.disabled = !all;
 }
 
 /* ---- scoring: each skill = average of its answers, turned into 0–100 ---- */
