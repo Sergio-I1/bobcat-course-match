@@ -145,6 +145,22 @@ function setup() {
   sum.setColumnWidth(4, 330); sum.setColumnWidth(5, 70); sum.setColumnWidth(6, 20);
   sum.setColumnWidth(7, 260); sum.setColumnWidth(8, 70);
 
+  // Clicks per day: dates along the bottom, number of course clicks up the side
+  const clicks = sum.newChart().asLineChart()
+    .addRange(day.getRange("A1:A400"))
+    .addRange(day.getRange("E1:E400"))
+    .setNumHeaders(1)
+    .setOption("title", "🖱️ Course clicks per day")
+    .setOption("colors", [MAROON])
+    .setOption("legend", { position: "none" })
+    .setOption("pointSize", 7)
+    .setOption("lineWidth", 3)
+    .setOption("vAxis", { title: "Clicks", minValue: 0, format: "0" })
+    .setOption("hAxis", { title: "Date", format: "MMM d" })
+    .setOption("width", 760).setOption("height", 320)
+    .setPosition(21, 4, 0, 0).build();
+  sum.insertChart(clicks);
+
   // Trend: visits, started, finished and course clicks per day
   const trend = sum.newChart().asLineChart()
     .addRange(day.getRange("A1:E400"))
@@ -154,10 +170,10 @@ function setup() {
     .setOption("legend", { position: "bottom" })
     .setOption("pointSize", 6)
     .setOption("curveType", "function")
-    .setOption("vAxis", { minValue: 0, format: "0" })
-    .setOption("hAxis", { format: "MMM d" })
+    .setOption("hAxis", { title: "Date", format: "MMM d" })
+    .setOption("vAxis", { title: "Count", minValue: 0, format: "0" })
     .setOption("width", 760).setOption("height", 330)
-    .setPosition(21, 4, 0, 0).build();
+    .setPosition(39, 4, 0, 0).build();
   sum.insertChart(trend);
 
   // Bar chart: most-clicked courses
@@ -167,7 +183,7 @@ function setup() {
     .setOption("colors", [MAROON])
     .setOption("legend", { position: "none" })
     .setOption("width", 760).setOption("height", 300)
-    .setPosition(40, 4, 0, 0).build();
+    .setPosition(58, 4, 0, 0).build();
   sum.insertChart(bars);
 
   // clean up the default empty tab
