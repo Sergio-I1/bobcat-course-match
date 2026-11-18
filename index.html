@@ -391,7 +391,10 @@
 
   .fdd summary{display:flex;align-items:center;gap:6px}
   .fdd summary b{margin-left:0}
-  .fv{font-size:12px;opacity:.7}
+  .fv{display:inline-block;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid var(--ink);margin-left:2px;transition:transform .15s}
+  .fdd[open] .fv{transform:rotate(180deg)}
+  .fhint{font-size:13px;font-weight:800;color:var(--muted);margin:6px 2px 0;display:flex;align-items:center;gap:6px}
+  .fhint .fv{border-top-color:var(--muted)}
   .fmeta{display:flex;align-items:center;gap:12px;margin:8px 2px 6px}
   .fmeta .fcount{margin:0;font-size:16px}
   .fclear{border:0;background:none;color:var(--maroon);font-weight:800;font-size:14px;text-decoration:underline;padding:4px;cursor:pointer}
@@ -528,7 +531,8 @@
     .filters{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;overflow:visible;margin:4px 0 0;padding:0}
     .fdd summary{flex-direction:column;justify-content:center;gap:1px;padding:8px 2px 7px;min-height:58px;border-radius:14px;font-size:12.5px;position:relative;white-space:nowrap}
     .fdd summary .fe{font-size:20px;line-height:1.1}
-    .fdd summary .fv{display:none}
+    .fdd summary .fv{display:block;margin:3px 0 0}
+    .fdd summary{min-height:66px}
     .fdd summary b{position:absolute;top:-7px;right:-4px;min-width:20px;font-size:11.5px;padding:1px 5px;margin:0}
     .fmeta{margin:10px 2px 4px}
     /* roomier list */
@@ -1359,7 +1363,7 @@ function allPage(){
   const shown = CATALOG.filter(match), groups = [];
   shown.forEach(c=>{ let g=groups.find(x=>x.grp===c.grp); if(!g) groups.push(g={grp:c.grp,items:[]}); g.items.push(c); });
   const dd = (k,emoji,word,opts) => `<details class="fdd ${F[k].size?"on":""}" data-k="${k}" ${openF===k?"open":""}>
-      <summary><span class="fe">${emoji}</span><span class="fw">${word}</span>${F[k].size?`<b>${F[k].size}</b>`:""}<span class="fv">▾</span></summary>
+      <summary><span class="fe">${emoji}</span><span class="fw">${word}</span>${F[k].size?`<b>${F[k].size}</b>`:""}<span class="fv" aria-hidden="true"></span></summary>
       <div class="fpanel"><div class="fhead">${emoji} ${word}</div>${opts.map(o=>`<label><input type="checkbox" data-f="${k}" value="${o[0]}" ${F[k].has(o[0])?"checked":""}>${esc(o[1])}</label>`).join("")}<button class="btn fdone" type="button">Done ✓</button></div></details>`;
   const anyOn = Object.values(F).some(s=>s.size);
   const body = groups.map(g=>`<tr class="grp"><td colspan="${cols.length+2}">${esc(g.grp)}</td></tr>`
@@ -1382,6 +1386,7 @@ function allPage(){
       ${dd("time","⏱️","Time",HOURS.map(b=>[b[0],b[1]]))}
       ${dd("where","📍","Where",[["online","💻 Online (Coursera)"],["campus","🏫 In person (San Marcos)"]])}
     </div>
+    <div class="fhint">Filters: tap a box to choose <span class="fv"></span></div>
     <div class="fmeta"><span class="fcount">${shown.length} of ${CATALOG.length} courses</span>
       ${anyOn?'<button class="fclear" id="fclear">✖ Clear filters</button>':""}</div>
     <div class="legend"><span><span class="star">⭐</span> Main skill</span><span><span class="star s">⭐</span> Bonus skill</span><span>📜 Certificate</span><span>🏅 Badge</span></div>
