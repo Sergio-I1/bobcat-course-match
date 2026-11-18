@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fff6e3">
+<title>Bobcat Course Match</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --maroon:#6b1a1f; --maroon-2:#8a2a30; --gold:#e8b44c; --gold-soft:#fdf1d6; --pink:#fbe3e1;
+    --ink:#2a1f1c; --muted:#7a6c66; --line:#efe3d8; --bg:#fff9f1; --card:#fff;
+    --good:#3b8a64; --warn:#d9822b;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;font-family:Nunito,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);line-height:1.5;
+    background:var(--bg);overflow-x:hidden}
+  h1,h2,h3,.brand,.q-text,.big{font-family:"Baloo 2",Nunito,sans-serif}
+
+  /* soft floating blobs in the background */
+  .blob{position:fixed;border-radius:50%;filter:blur(50px);opacity:.55;z-index:0;animation:float 14s ease-in-out infinite}
+  .b1{width:380px;height:380px;background:#ffd9a8;top:-90px;left:-80px}
+  .b2{width:420px;height:420px;background:#f7c5c5;bottom:-140px;right:-100px;animation-delay:-5s}
+  .b3{width:260px;height:260px;background:#ffe9a6;top:40%;right:22%;animation-delay:-9s;opacity:.4}
+  @keyframes float{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(30px,-28px) scale(1.08)}}
+
+  header{position:relative;z-index:2;padding:18px 28px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+  .brand{font-weight:800;font-size:24px;color:var(--maroon);display:flex;align-items:center;gap:8px}
+  .brand .paw{display:inline-block;animation:wiggle 3s ease-in-out infinite}
+  @keyframes wiggle{0%,85%,100%{transform:rotate(0)}90%{transform:rotate(-14deg)}95%{transform:rotate(12deg)}}
+  .tag{font-size:12px;font-weight:700;background:#fff;border:1px solid var(--line);color:var(--muted);padding:5px 12px;border-radius:99px}
+
+  main{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:8px 24px 60px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:26px;padding:32px;
+    box-shadow:0 10px 30px rgba(107,26,31,.07)}
+  .muted{color:var(--muted)} .small{font-size:13.5px}
+  p{margin:0 0 12px}
+  a{color:var(--maroon);font-weight:800}
+  button{font:inherit;cursor:pointer}
+  .btn{background:var(--maroon);color:#fff;border:0;border-radius:99px;padding:14px 28px;font-weight:800;font-size:17px;
+    box-shadow:0 6px 0 #45090d;transition:transform .12s, box-shadow .12s}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 8px 0 #45090d}
+  .btn:active{transform:translateY(4px);box-shadow:0 2px 0 #45090d}
+  .btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+  .btn.ghost{background:#fff;color:var(--maroon);box-shadow:0 6px 0 var(--line);border:2px solid var(--line)}
+
+  /* ---------- home ---------- */
+  .hero{display:grid;grid-template-columns:1.2fr 1fr;gap:40px;align-items:center;padding:48px}
+  .hero h1{font-size:54px;line-height:1.02;margin:0 0 14px;color:var(--maroon)}
+  .hero p.lead{font-size:19px}
+  .mascot{font-size:150px;text-align:center;animation:bob 3s ease-in-out infinite;filter:drop-shadow(0 16px 14px rgba(107,26,31,.18))}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-16px) rotate(3deg)}}
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:20px}
+  .step{background:#fff;border:1px solid var(--line);border-radius:22px;padding:20px;animation:rise .6s both}
+  .step:nth-child(2){animation-delay:.1s}.step:nth-child(3){animation-delay:.2s}
+  .step .e{font-size:34px}.step b{display:block;font-size:17px;color:var(--maroon)}
+  @keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+
+  /* ---------- quiz layout ---------- */
+  .quiz{display:grid;grid-template-columns:310px 1fr;gap:24px;align-items:start}
+  .side{background:#fff;border:1px solid var(--line);border-radius:26px;padding:20px 14px;position:sticky;top:16px;
+    box-shadow:0 10px 30px rgba(107,26,31,.06)}
+  .side h3{margin:0 8px 2px;font-size:19px;color:var(--maroon)}
+  .side .count{margin:0 8px 10px;font-size:13px;color:var(--muted);font-weight:700}
+  .track{height:10px;background:var(--line);border-radius:99px;margin:0 8px 14px;overflow:hidden}
+  .track i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--gold),var(--maroon));transition:width .5s cubic-bezier(.3,1.4,.5,1)}
+  .qlist{list-style:none;margin:0;padding:0;display:grid;gap:3px}
+  .qi{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:0;background:transparent;border-radius:14px;
+    padding:8px 10px;color:var(--ink);font-weight:700;font-size:14.5px;transition:background .15s, transform .15s}
+  .qi:hover{background:var(--gold-soft);transform:translateX(3px)}
+  .qi .ic{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;flex:none;font-size:15px;
+    background:var(--line);transition:background .25s, transform .25s}
+  .qi.done .ic{background:#dff3e7;color:var(--good);font-weight:800}
+  .qi.done .ic.pop{animation:pop .4s}
+  .qi.now{background:var(--pink);color:var(--maroon)}
+  .qi.now .ic{background:var(--maroon);transform:scale(1.1)}
+  .qi .lbl{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .qi:not(.done):not(.now){color:var(--muted)}
+  @keyframes pop{0%{transform:scale(.4)}60%{transform:scale(1.35)}100%{transform:scale(1)}}
+
+  .stage{min-height:480px;display:flex;flex-direction:column;justify-content:center;padding:44px}
+  .stage.in > *{animation:slide .45s cubic-bezier(.2,.9,.3,1.2) both}
+  .stage.in > *:nth-child(2){animation-delay:.05s}.stage.in > *:nth-child(3){animation-delay:.1s}.stage.in > *:nth-child(4){animation-delay:.15s}
+  @keyframes slide{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:none}}
+  .q-emoji{font-size:64px;line-height:1;margin-bottom:6px;display:inline-block;animation:bob 3s ease-in-out infinite}
+  .q-kicker{font-weight:800;color:var(--gold);text-transform:uppercase;letter-spacing:1px;font-size:13px;filter:brightness(.75)}
+  .q-text{font-size:34px;font-weight:700;line-height:1.15;margin:4px 0 6px}
+  .faces{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:26px}
+  .opts{display:grid;gap:12px;margin-top:26px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+  .chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+  .opt{background:#fff;border:2px solid var(--line);border-radius:20px;padding:16px 14px;color:var(--ink);font-weight:700;
+    text-align:center;transition:transform .15s, border-color .15s, background .15s, box-shadow .15s;box-shadow:0 4px 0 var(--line)}
+  .opt:hover{transform:translateY(-4px) rotate(-1deg);border-color:var(--gold);box-shadow:0 8px 0 var(--gold-soft)}
+  .opt .f{display:block;font-size:38px;line-height:1.1;margin-bottom:4px;transition:transform .2s}
+  .opt:hover .f{transform:scale(1.2)}
+  .opt.on{background:var(--pink);border-color:var(--maroon);box-shadow:0 4px 0 var(--maroon);animation:pop .35s}
+  .chips .opt{border-radius:99px;padding:11px 18px}
+  .hint{margin-top:22px;font-size:13.5px;color:var(--muted);font-weight:700}
+  .finish{margin-top:26px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+
+  /* ---------- results ---------- */
+  .res{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+  .res h2{margin:0 0 6px;font-size:28px;color:var(--maroon)}
+  .overall{display:flex;align-items:center;gap:20px;margin:6px 0 10px}
+  .ring{--p:0;width:130px;height:130px;border-radius:50%;flex:none;display:grid;place-items:center;
+    background:conic-gradient(var(--maroon) calc(var(--p)*1%), var(--line) 0)}
+  .ring .big{width:102px;height:102px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:44px;font-weight:800;color:var(--maroon)}
+  .bar-row{margin:16px 0}
+  .bar-top{display:flex;justify-content:space-between;font-weight:800}
+  .bar{height:16px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:6px}
+  .bar i{display:block;height:100%;width:0;border-radius:99px;background:var(--gold);transition:width 1.1s cubic-bezier(.2,.9,.3,1)}
+  .bar.low i{background:var(--warn)} .bar.high i{background:var(--good)}
+  .note{font-size:13px;color:var(--muted);margin-top:3px}
+  .rec{border:2px solid var(--line);border-radius:20px;padding:16px 18px;margin-top:14px;animation:rise .5s both;transition:transform .15s,border-color .15s}
+  .rec:hover{transform:translateY(-3px);border-color:var(--gold)}
+  .rec h3{margin:0;font-size:20px}
+  .rec .rank{float:right;font-size:26px}
+  .meta{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+  .pill{font-size:12px;padding:3px 10px;border-radius:99px;background:var(--gold-soft);color:#6b4d0e;font-weight:800}
+  .pill.m{background:var(--pink);color:var(--maroon)}
+  .why{font-size:14.5px;margin:8px 0;background:#fffaf0;border-radius:12px;padding:8px 12px}
+  .gap{border-left:5px solid var(--warn);background:#fff3e2;border-radius:14px;padding:12px 14px;margin-top:10px;font-size:14.5px}
+  .stack{display:grid;gap:24px}
+  details{margin-top:18px} summary{cursor:pointer;font-weight:800;color:var(--maroon)}
+  .toast{font-weight:800;color:var(--good);margin-left:6px}
+  .confetti{position:fixed;top:-20px;width:10px;height:16px;border-radius:3px;z-index:9;pointer-events:none;animation:fall linear forwards}
+  @keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:.9}}
+
+
+  a.btn{display:inline-block;text-decoration:none}
+  .login{margin-top:12px}
+  .login a.btn{font-size:15px;padding:10px 20px}
+  .seen{background:#dff3e7!important;color:#1f6a45!important}
+  .sec-sub{font-family:"Baloo 2",sans-serif;font-size:24px;color:var(--maroon);margin:0 0 4px}
+  /* ---------- top nav ---------- */
+  .nav{display:flex;gap:6px;background:#fff;border:1px solid var(--line);border-radius:99px;padding:5px}
+  .navb{border:0;background:transparent;border-radius:99px;padding:8px 18px;font-weight:800;color:var(--muted);transition:background .2s,color .2s}
+  .navb:hover{color:var(--maroon)}
+  .navb.on{background:var(--maroon);color:#fff}
+
+  /* ---------- results v2 ---------- */
+  .results{display:grid;gap:24px}
+  .results h2,.allp h2{margin:0 0 6px;font-size:28px;color:var(--maroon)}
+  .certbar{display:flex;gap:18px;align-items:center;background:linear-gradient(135deg,#fff3d0,#fbe3e1);border:2px dashed var(--gold);
+    border-radius:26px;padding:20px 26px;animation:rise .5s both}
+  .certbar .seal{font-size:54px;animation:bob 3s ease-in-out infinite;flex:none}
+  .certbar b.t{font-family:"Baloo 2",sans-serif;font-size:22px;color:var(--maroon);display:block;line-height:1.2}
+  .certbar .chips2{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+
+  .vchart{position:relative;display:grid;grid-template-columns:repeat(6,1fr);gap:14px;padding-top:30px;margin-top:10px}
+  .maxline{position:absolute;left:0;right:0;top:30px;border-top:3px dashed var(--maroon);z-index:2}
+  .maxline span{position:absolute;right:0;top:-27px;font-size:13px;font-weight:800;color:var(--maroon);background:var(--pink);padding:2px 10px;border-radius:99px}
+  .vcol{text-align:center}
+  .vtrack{position:relative;height:240px;width:min(74px,100%);margin:0 auto;background:var(--line);border-radius:0 0 18px 18px;overflow:visible}
+  .vtrack i{position:absolute;left:0;right:0;bottom:0;height:0;border-radius:14px 14px 18px 18px;background:var(--gold);
+    transition:height 1.2s cubic-bezier(.2,.9,.3,1.15)}
+  .vtrack.low i{background:var(--warn)} .vtrack.high i{background:var(--good)}
+  .vtrack b{position:absolute;left:0;right:0;bottom:6px;font-family:"Baloo 2",sans-serif;font-size:24px;line-height:1;
+    transition:bottom 1.2s cubic-bezier(.2,.9,.3,1.15)}
+  .vtrack b.inside{color:#fff}
+  .vname{font-weight:800;font-size:14px;margin-top:8px;line-height:1.25}
+  .vname .ve{font-size:26px;display:block}
+  .vword{font-size:12.5px;color:var(--muted);font-weight:700}
+
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:13.5px;font-weight:700;color:var(--muted);margin:4px 0 6px}
+  .sw{display:inline-block;width:16px;height:16px;border-radius:5px;vertical-align:-3px;margin-right:5px;background:var(--maroon)}
+  .sw.more{background:repeating-linear-gradient(135deg,rgba(107,26,31,.35) 0 5px,rgba(107,26,31,.12) 5px 10px);border:2px dashed var(--maroon)}
+  .picks{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;margin-top:14px}
+  a.pick{position:relative;display:flex;flex-direction:column;text-decoration:none;color:var(--ink);font-weight:400;background:#fff;
+    border:2px solid var(--line);border-radius:24px;overflow:hidden;animation:rise .5s both;
+    transition:transform .18s,border-color .18s,box-shadow .18s;box-shadow:0 6px 0 var(--line)}
+  a.pick:hover{transform:translateY(-6px) rotate(-.4deg);border-color:var(--maroon);box-shadow:0 12px 0 var(--pink)}
+  .art{position:relative;height:120px;display:grid;place-items:center;overflow:hidden}
+  .art::before,.art::after{content:"";position:absolute;border-radius:50%;background:rgba(255,255,255,.4)}
+  .art::before{width:120px;height:120px;left:-30px;top:-40px}.art::after{width:80px;height:80px;right:-16px;bottom:-28px}
+  .scene{font-size:54px;letter-spacing:6px;position:relative;z-index:1;filter:drop-shadow(0 6px 6px rgba(0,0,0,.15));transition:transform .25s}
+  a.pick:hover .scene{transform:scale(1.15) rotate(-4deg)}
+  .medal{position:absolute;left:12px;top:8px;font-size:30px;z-index:1}
+  .pbody{padding:16px 18px 54px;display:flex;flex-direction:column;gap:8px;flex:1}
+  .pbody h3{margin:0;font-size:21px;line-height:1.2;color:var(--maroon)}
+  .pbody h3 .arr{font-size:16px;opacity:.6}
+  .pbody p{margin:0}
+  .grow{background:#fffaf0;border-radius:16px;padding:12px}
+  .gtitle{font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:#8a6410;margin-bottom:8px}
+  .gbars{display:flex;gap:12px;justify-content:space-around}
+  .g{text-align:center;flex:1;min-width:0}
+  .gtrack{position:relative;height:110px;width:42px;margin:0 auto;background:var(--line);border-radius:0 0 10px 10px;border-top:2px dashed var(--maroon)}
+  .gtrack .now{position:absolute;left:0;right:0;bottom:0;background:var(--maroon);border-radius:0 0 10px 10px}
+  .gtrack .more{position:absolute;left:0;right:0;border:2px dashed var(--maroon);border-bottom:0;border-radius:8px 8px 0 0;
+    background:repeating-linear-gradient(135deg,rgba(107,26,31,.35) 0 5px,rgba(107,26,31,.12) 5px 10px);
+    animation:pulse 1.8s ease-in-out infinite}
+  .gtrack .more em{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-style:normal;font-weight:800;font-size:12px;
+    color:var(--maroon);background:#fff;border-radius:99px;padding:0 5px;white-space:nowrap}
+  @keyframes pulse{0%,100%{opacity:.65}50%{opacity:1}}
+  .glbl{font-size:12px;font-weight:700;margin-top:6px;line-height:1.25}
+  .glbl b{display:block;font-size:14px;color:var(--maroon)}
+  .pwhy{font-size:14px}
+  .earn{position:absolute;right:12px;bottom:12px;background:var(--gold);color:#3d2a00;font-weight:800;font-size:12.5px;
+    padding:6px 12px;border-radius:99px;box-shadow:0 3px 0 #b98a2a;transform:rotate(-3deg)}
+
+
+  /* ---------- cleaner cards (v3) ---------- */
+  a.pick{--c:#6b1a1f;--soft:#fbe3e1;border-width:3px;border-color:var(--soft);box-shadow:0 8px 0 var(--soft);cursor:pointer}
+  a.pick:hover{border-color:var(--c);box-shadow:0 14px 0 var(--soft)}
+  .art{height:150px;background:var(--soft);
+    background-image:radial-gradient(circle at 20% 20%,rgba(255,255,255,.7) 0 3px,transparent 4px),radial-gradient(circle at 80% 30%,rgba(255,255,255,.7) 0 3px,transparent 4px),radial-gradient(circle at 65% 80%,rgba(255,255,255,.7) 0 3px,transparent 4px)}
+  .art::before{background:var(--c);opacity:.28;width:190px;height:190px;left:50%;top:50%;transform:translate(-50%,-50%)}
+  .art::after{display:none}
+  .scene{font-size:66px;letter-spacing:4px}
+  .rank{position:absolute;left:12px;top:12px;z-index:2;background:#fff;color:var(--ink);font-weight:800;font-size:13px;padding:4px 12px;border-radius:99px;box-shadow:0 3px 0 rgba(0,0,0,.08)}
+  .builds{position:absolute;right:12px;bottom:10px;z-index:2;background:var(--c);color:#fff;font-weight:800;font-size:12.5px;padding:4px 12px;border-radius:99px}
+  .pbody{padding:18px 20px 16px;gap:10px}
+  .pbody h3{color:var(--ink);font-size:22px}
+  .byline{font-size:13.5px;font-weight:700;color:var(--muted);margin-top:-6px}
+  .byline .ok{color:#1f6a45}
+  .what{font-size:15.5px}
+  .grow{background:var(--soft);border-radius:18px;padding:14px 16px}
+  .gtitle{color:var(--ink);opacity:.7;margin-bottom:10px}
+  .grow-row + .grow-row{margin-top:12px}
+  .gr-top{display:flex;justify-content:space-between;align-items:baseline;font-weight:800;font-size:14.5px}
+  .gr-num{font-family:"Baloo 2",sans-serif;font-size:17px;white-space:nowrap}
+  .gr-num s{text-decoration:none;opacity:.55}
+  .gr-num b{color:var(--c);font-size:21px}
+  .hbar{display:flex;height:16px;background:#fff;border-radius:99px;overflow:hidden;margin-top:5px}
+  .hbar .now{background:var(--c);border-radius:99px 0 0 99px}
+  .hbar .more{background:repeating-linear-gradient(135deg,var(--c) 0 5px,transparent 5px 10px);opacity:.55;animation:pulse 1.8s ease-in-out infinite}
+  .gr-key{display:flex;gap:14px;font-size:12px;font-weight:700;color:var(--muted);margin-top:10px}
+  .gr-key i{display:inline-block;width:12px;height:12px;border-radius:4px;background:var(--c);vertical-align:-1px;margin-right:4px}
+  .gr-key i.m{background:repeating-linear-gradient(135deg,var(--c) 0 3px,transparent 3px 6px);opacity:.6}
+  .match{font-size:14px;font-weight:700}
+  .cta{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 16px;background:var(--soft);margin-top:auto}
+  .go{background:var(--c);color:#fff;font-weight:800;padding:10px 18px;border-radius:99px;box-shadow:0 4px 0 rgba(0,0,0,.18);transition:transform .15s;white-space:nowrap}
+  a.pick:hover .go{transform:translateX(4px)}
+  a.pick:active .go{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.18)}
+  .cta .earn{position:static;transform:rotate(-2deg);white-space:nowrap}
+
+
+  /* ---------- v4: fewer words, more pictures ---------- */
+  .hero h1{font-size:50px}
+  .step{text-align:center;font-family:"Baloo 2",sans-serif;font-size:20px;font-weight:700;color:var(--maroon)}
+  .step .e{font-size:44px}
+  .certbar{padding:16px 22px;gap:16px;flex-wrap:wrap}
+  .certbar .seal{font-size:44px}
+  .certbar b.t{font-size:24px}
+  .cb-main{flex:1;min-width:220px}
+  .certbar .chips2{margin-top:6px;gap:8px}
+  .certbar .chips2 span{background:#fff;border-radius:99px;padding:5px 14px;font-weight:800;font-size:14px;color:var(--maroon);box-shadow:0 3px 0 rgba(107,26,31,.12)}
+  .results h2,.allp h2{margin-bottom:12px}
+  .art{height:160px}
+  .art::before{background:#fff;opacity:.6;width:170px;height:170px}
+  .art svg{height:124px;width:auto;position:relative;z-index:1;filter:drop-shadow(0 8px 8px rgba(0,0,0,.16));transition:transform .25s}
+  a.pick:hover .art svg{transform:scale(1.1) rotate(-3deg)}
+  .rank{font-size:20px;padding:2px 10px}
+  .yours{position:absolute;right:12px;top:12px;z-index:2;background:var(--c);color:#fff;font-weight:800;font-size:12.5px;padding:4px 12px;border-radius:99px}
+  .pbody{padding:16px 18px 14px;gap:8px}
+  .pbody h3{font-size:21px}
+  .byline{margin-top:-4px}
+  .boosts{display:flex;gap:10px;margin-top:6px}
+  .boost{flex:1}
+  .boost{background:var(--soft);border-radius:18px;padding:10px 8px;text-align:center;line-height:1.15}
+  .boost .be{font-size:26px;display:block}
+  .boost .bn{font-family:"Baloo 2",sans-serif;font-weight:800;font-size:30px;color:var(--c);display:block}
+  .boost .bn small{font-size:16px}
+  .boost .bl{font-size:12.5px;font-weight:800;color:var(--muted);display:block}
+  .cta{padding:12px 16px}
+  .earnic{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:24px;background:var(--gold);
+    box-shadow:0 3px 0 #b98a2a;transform:rotate(-6deg);flex:none}
+  .gapbtns{display:flex;flex-wrap:wrap;gap:10px}
+  .gapbtns a{font-size:15px;padding:10px 18px}
+  .acts{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+
+
+  /* ---------- v5: filters, time chip, PDF ---------- */
+  .filters{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin:6px 0 4px}
+  .fsel{display:flex;flex-direction:column;gap:3px;font-size:12.5px;font-weight:800;color:var(--muted)}
+  .fsel select{font:inherit;font-weight:800;font-size:15px;color:var(--maroon);background:#fff;border:2px solid var(--line);border-radius:14px;
+    padding:9px 12px;min-width:150px;cursor:pointer;box-shadow:0 3px 0 var(--line)}
+  .fsel select:hover,.fsel select:focus{border-color:var(--gold);outline:none}
+  .fsel select.on{background:var(--pink);border-color:var(--maroon)}
+  .fclear{font-size:14px!important;padding:9px 16px!important}
+  .fcount{font-weight:800;color:var(--maroon);margin-left:auto;font-family:"Baloo 2",sans-serif;font-size:18px}
+  .empty{text-align:center;padding:40px 10px;font-family:"Baloo 2",sans-serif;font-size:22px;color:var(--muted)}
+  .pdfrow{display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:linear-gradient(135deg,#fff3d0,#fbe3e1);border-radius:20px;padding:16px 20px;margin-bottom:16px}
+  .pdfrow .pe{font-size:40px}
+  .pdfrow b{font-family:"Baloo 2",sans-serif;font-size:22px;color:var(--maroon);flex:1;min-width:180px}
+
+
+  /* ---------- multi-select filters ---------- */
+  .fdd{position:relative}
+  .fdd summary{list-style:none;cursor:pointer;font-weight:800;font-size:15px;color:var(--maroon);background:#fff;border:2px solid var(--line);
+    border-radius:14px;padding:9px 14px;box-shadow:0 3px 0 var(--line);user-select:none;white-space:nowrap}
+  .fdd summary::-webkit-details-marker{display:none}
+  .fdd summary:hover{border-color:var(--gold)}
+  .fdd.on summary{background:var(--pink);border-color:var(--maroon)}
+  .fdd summary b{display:inline-block;min-width:22px;text-align:center;background:var(--maroon);color:#fff;border-radius:99px;font-size:12.5px;padding:1px 6px;margin-left:4px}
+  .fdd[open] summary{border-color:var(--maroon)}
+  .fpanel{position:absolute;top:calc(100% + 8px);left:0;z-index:20;background:#fff;border:2px solid var(--line);border-radius:16px;padding:8px;
+    min-width:240px;box-shadow:0 14px 30px rgba(107,26,31,.18);display:grid;gap:2px;animation:rise .18s both}
+  .fpanel label{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;font-weight:700;font-size:14.5px;cursor:pointer;white-space:nowrap}
+  .fpanel label:hover{background:var(--gold-soft)}
+  .fpanel input{width:18px;height:18px;accent-color:var(--maroon);cursor:pointer;flex:none}
+  .filters{align-items:center}
+
+  /* ---------- all credentials table ---------- */
+  .tablewrap{overflow-x:auto;margin-top:14px;border:2px solid var(--line);border-radius:20px}
+  table.grid{border-collapse:separate;border-spacing:0;width:100%;min-width:820px;font-size:14.5px}
+  .grid th{position:sticky;top:0;background:var(--maroon);color:#fff;padding:12px 8px;font-size:13px;line-height:1.2;vertical-align:bottom}
+  .grid th:first-child{text-align:left;padding-left:18px;font-size:15px}
+  .grid th .the{display:block;font-size:26px}
+  .grid td{padding:11px 8px;text-align:center;border-top:1px solid var(--line)}
+  .grid td:first-child{text-align:left;padding-left:18px}
+  .grid tbody tr:not(.grp){transition:background .15s}
+  .grid tbody tr:not(.grp):hover{background:var(--gold-soft)}
+  .grid tr.grp td{background:var(--pink);color:var(--maroon);font-weight:800;font-family:"Baloo 2",sans-serif;font-size:16px;text-align:left}
+  .grid a{text-decoration:none}
+  .grid a:hover{text-decoration:underline}
+  .grid .sub{display:block;font-size:12px;color:var(--muted);font-weight:600}
+  .star{font-size:22px;display:inline-block;transition:transform .2s}
+  .star.s{font-size:14px;opacity:.75}
+  .grid tr:hover .star{transform:scale(1.3) rotate(15deg)}
+  .earnc{font-weight:800;font-size:13px;white-space:nowrap}
+
+  @media(max-width:900px){
+    .certbar{flex-direction:column;text-align:center}
+    .vchart{gap:6px}.vtrack{height:180px}.vname{font-size:11px}.vword{display:none}
+    .picks{grid-template-columns:1fr}
+    header{padding:14px 16px}
+  }
+
+
+  /* ---------- v6: calmer, warmer background ---------- */
+  body{background:linear-gradient(165deg,#fffdf8 0%,#fff6ea 38%,#fdeeee 72%,#f6f1e6 100%) fixed}
+  .blob{filter:blur(80px);opacity:.5;animation-duration:26s}
+  .b1{width:520px;height:520px;background:#ffe9bf;top:-160px;left:-140px}
+  .b2{width:560px;height:560px;background:#f9d9d9;bottom:-220px;right:-160px}
+  .b3{width:420px;height:420px;background:#e6f0df;top:35%;right:-120px;opacity:.55}
+  .card,.side{border-color:#f3e9df;box-shadow:0 12px 34px rgba(107,26,31,.06)}
+  .step{border-color:#f3e9df;background:rgba(255,255,255,.85)}
+  .grid th{background:#8a2a30}
+
+
+  /* ---------- v7: friendly checkboxes + sunrise background ---------- */
+  :root{color-scheme:light}
+  .fpanel input{appearance:none;-webkit-appearance:none;width:22px;height:22px;border-radius:8px;background:#fff;border:2px solid #e3cfc2;
+    display:grid;place-items:center;transition:background .15s,border-color .15s,transform .15s;margin:0}
+  .fpanel label:hover input{border-color:var(--gold)}
+  .fpanel input:checked{background:var(--maroon);border-color:var(--maroon);transform:scale(1.08)}
+  .fpanel input:checked::after{content:"✓";color:#fff;font-size:14px;font-weight:800;line-height:1}
+  .fpanel input:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+  body{background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320' preserveAspectRatio='none'%3E%3Cpath fill='%23f3c9c4' fill-opacity='.55' d='M0 200c180-70 360-70 540-20s360 60 540 10 240-70 360-50v180H0z'/%3E%3Cpath fill='%23f6dfa6' fill-opacity='.6' d='M0 250c200-50 400-40 600 0s400 40 600 0 160-40 240-30v100H0z'/%3E%3Cpath fill='%238a2a30' fill-opacity='.10' d='M0 290c240-30 480-30 720 0s480 20 720-10v40H0z'/%3E%3C/svg%3E") bottom center/100% 300px no-repeat fixed,
+    radial-gradient(1100px 520px at 50% -120px,#ffe6ae 0%,rgba(255,230,174,0) 70%) fixed,
+    linear-gradient(180deg,#fff6e3 0%,#fffaf3 35%,#fdf1ee 75%,#fbe6e3 100%) fixed}
+  .blob{opacity:.35}
+  .b3{background:#fde3c8}
+
+  footer{position:relative;z-index:1;font-size:12px;color:var(--muted);text-align:center;padding:0 16px 30px}
+
+  @media(max-width:900px){
+    .hero{grid-template-columns:1fr;padding:30px;text-align:center}.hero h1{font-size:38px}.mascot{font-size:100px;order:-1}
+    .steps{grid-template-columns:1fr}
+    .quiz{grid-template-columns:1fr}
+    .side{position:static;padding:14px}
+    .qlist{display:flex;overflow-x:auto;gap:6px;padding-bottom:4px}
+    .qi{width:auto;flex:none;padding:6px}.qi .lbl{display:none}.qi.now .lbl{display:block;padding-right:8px}
+    .stage{padding:26px;min-height:0}.q-text{font-size:26px}
+    .faces{grid-template-columns:1fr}.faces .opt{display:flex;align-items:center;gap:12px;text-align:left}
+    .faces .opt .f{font-size:28px;margin:0}
+    .res{grid-template-columns:1fr}
+  }
+
+
+  /* ---------- v9: browse button, page slide, filter row, roomier list ---------- */
+  .browse{display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;margin-top:18px;padding:16px 18px;text-align:left;
+    background:linear-gradient(135deg,#fff,#fff5e2);border:2px dashed var(--gold);border-radius:22px;color:var(--ink);font:inherit;
+    box-shadow:0 6px 0 #f3e3c2;transition:transform .15s,box-shadow .15s}
+  .browse:hover{transform:translateY(-2px);box-shadow:0 8px 0 #f3e3c2}
+  .browse:active{transform:translateY(3px);box-shadow:0 2px 0 #f3e3c2}
+  .browse .bl b{display:block;font-family:"Baloo 2",sans-serif;font-size:20px;color:var(--maroon);line-height:1.2}
+  .browse .bl small{display:block;font-size:14px;font-weight:700;color:var(--muted)}
+  .bpill{flex:none;display:flex;align-items:center;gap:6px;background:var(--maroon);color:#fff;font-weight:800;font-size:15px;padding:10px 16px;border-radius:99px;
+    box-shadow:0 4px 0 #45090d;white-space:nowrap}
+  .barrow{display:inline-block;animation:nudge 1.3s ease-in-out infinite}
+  @keyframes nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(7px)}}
+  #app.slide-r{animation:slideR .35s cubic-bezier(.2,.9,.3,1) both}
+  #app.slide-l{animation:slideL .35s cubic-bezier(.2,.9,.3,1) both}
+  @keyframes slideR{from{opacity:0;transform:translateX(60px)}to{opacity:1;transform:none}}
+  @keyframes slideL{from{opacity:0;transform:translateX(-60px)}to{opacity:1;transform:none}}
+
+  .fdd summary{display:flex;align-items:center;gap:6px}
+  .fdd summary b{margin-left:0}
+  .fv{font-size:12px;opacity:.7}
+  .fmeta{display:flex;align-items:center;gap:12px;margin:8px 2px 6px}
+  .fmeta .fcount{margin:0;font-size:16px}
+  .fclear{border:0;background:none;color:var(--maroon);font-weight:800;font-size:14px;text-decoration:underline;padding:4px;cursor:pointer}
+  .thumb{display:none}
+  .crow{display:block}
+  .ctext .sub{margin-top:2px}
+
+  /* =========================================================
+     PHONES & TABLETS
+     ========================================================= */
+  html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+  body{-webkit-tap-highlight-color:transparent}
+  .short,.mskills,.fhead,.fdone{display:none}
+  /* touch screens: no "stuck" hover effects after a tap */
+  @media (hover:none){
+    .opt:hover,.qi:hover,a.pick:hover,.rec:hover,.btn:hover{transform:none}
+    a.pick:hover{border-color:var(--soft);box-shadow:0 8px 0 var(--soft)}
+    a.pick:hover .art svg,a.pick:hover .go{transform:none}
+    .opt:hover .f{transform:none}
+    a.pick:active{transform:scale(.98)}
+    .opt:active{transform:scale(.97)}
+  }
+  @media (max-width:700px){
+    /* layout never wider than the screen */
+    html,body{overflow-x:hidden}
+    main{padding:4px 12px calc(96px + env(safe-area-inset-bottom))}
+    .quiz{grid-template-columns:minmax(0,1fr);gap:12px}
+    .side,.stage,.card{min-width:0}
+    .card{padding:20px;border-radius:22px}
+    .picks{grid-template-columns:minmax(0,1fr);gap:16px}
+    body{background-attachment:scroll,scroll,scroll}
+
+    /* header + bottom tab bar (like a phone app) */
+    header{padding:calc(12px + env(safe-area-inset-top)) 16px 8px;justify-content:center}
+    .brand{font-size:21px}
+    .nav{position:fixed;left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:50;display:grid;grid-template-columns:1fr 1fr;
+      padding:6px;border-radius:22px;box-shadow:0 10px 30px rgba(107,26,31,.22);border-color:#f0dcd2;background:rgba(255,255,255,.96)}
+    .navb{padding:12px 6px;font-size:15.5px;border-radius:16px}
+
+    /* home */
+    .hero{padding:26px 20px;gap:10px}
+    .hero h1{font-size:34px}
+    .mascot{font-size:78px}
+    .hero .btn{width:100%;padding:16px;font-size:19px}
+    .steps{grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+    .step{padding:12px 6px;font-size:14px;border-radius:18px}
+    .step .e{font-size:30px}
+    .certbar{padding:16px;gap:10px;border-radius:22px}
+    .certbar .seal{font-size:38px}
+    .certbar b.t{font-size:20px}
+    .certbar .chips2{justify-content:center}
+    .certbar .btn{width:100%}
+
+    /* survey */
+    .side{padding:12px 12px 10px;border-radius:20px}
+    .side h3{font-size:16px;margin:0 4px}
+    .side .count{margin:0 4px 6px}
+    .track{margin:0 4px 10px}
+    .qlist{scrollbar-width:none;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}
+    .qlist::-webkit-scrollbar{display:none}
+    .qi{scroll-snap-align:center;min-height:44px}
+    .qi .ic{width:34px;height:34px}
+    .stage{padding:22px 18px}
+    .q-emoji{font-size:48px}
+    .q-text{font-size:23px}
+    .faces,.opts{gap:10px;margin-top:18px}
+    .opts{grid-template-columns:1fr}
+    .opt{padding:14px 16px;min-height:56px;font-size:16.5px}
+    .opts .opt{display:flex;align-items:center;gap:12px;text-align:left}
+    .opts .opt .f{font-size:28px;margin:0}
+    .chips{gap:8px}
+    .chips .opt{min-height:44px;padding:10px 14px;font-size:15px}
+    .finish .btn{width:100%}
+
+    /* results */
+    .results{gap:14px}
+    .results h2,.allp h2{font-size:23px}
+    .vchart{gap:4px;padding-top:28px}
+    .vtrack{height:170px;width:min(46px,100%);border-radius:0 0 12px 12px}
+    .vtrack i{border-radius:10px 10px 12px 12px}
+    .vtrack b{font-size:18px}
+    .vname{font-size:11.5px;margin-top:6px}
+    .vname .ve{font-size:22px}
+    .vname .long{display:none}.vname .short{display:inline}
+    .maxline span{font-size:11.5px;top:-24px}
+    .art{height:130px}
+    .art svg{height:100px}
+    .pbody h3{font-size:19px}
+    .boost .bn{font-size:26px}
+    .go{padding:12px 18px;font-size:15.5px}
+    .pdfrow{flex-direction:column;text-align:center;gap:8px}
+    .pdfrow .btn{width:100%}
+    .acts .btn{flex:1 1 140px}
+    .gapbtns a{flex:1 1 100%;text-align:center}
+
+    /* all courses: filters as a bottom sheet */
+    .filters{gap:8px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0 -20px;padding:4px 20px 8px}
+    .filters::-webkit-scrollbar{display:none}
+    .fdd,.fclear{flex:none}
+    body.sheet-open .nav{display:none}
+    body.sheet-open{overflow:hidden}
+    .fdd summary{padding:10px 12px;font-size:14.5px;min-height:44px;display:flex;align-items:center;gap:2px}
+    .fcount{flex:none;margin:0 0 0 4px;font-size:15px;white-space:nowrap}
+    .fdd[open] > summary::before{content:"";position:fixed;inset:0;background:rgba(42,31,28,.38);z-index:60;animation:fadein .2s both}
+    .fpanel{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:61;min-width:0;max-height:75vh;overflow:auto;border-radius:24px 24px 0 0;
+      padding:8px 16px calc(16px + env(safe-area-inset-bottom));box-shadow:0 -10px 40px rgba(42,31,28,.25);animation:sheet .25s cubic-bezier(.2,.9,.3,1) both}
+    .fhead{display:block;font-family:"Baloo 2",sans-serif;font-size:20px;color:var(--maroon);padding:10px 4px 6px;position:relative}
+    .fhead::before{content:"";position:absolute;left:50%;top:-2px;width:44px;height:5px;border-radius:9px;background:#e8d9cf;transform:translateX(-50%)}
+    .fpanel label{padding:14px 8px;font-size:16.5px;white-space:normal;border-bottom:1px solid #f6ece4;border-radius:0}
+    .fpanel input{width:26px;height:26px}
+    .fdone{display:block;width:100%;margin-top:12px}
+
+    /* all courses: table becomes a simple list */
+    .tablewrap{border-radius:18px;overflow:visible;border-width:1.5px}
+    table.grid{min-width:0}
+    .grid thead{display:none}
+    .grid td:not(:first-child){display:none}
+    .grid td:first-child{padding:12px 14px}
+    .grid tr.grp td{display:table-cell;padding:10px 14px;font-size:15px}
+    .grid tbody tr:not(.grp) td:first-child a{font-size:16px;line-height:1.3}
+    .mskills{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0 2px}
+    .mskills span{font-size:12px;font-weight:800;background:#f6efe8;color:#6b5a52;border-radius:99px;padding:2px 9px}
+    .mskills span.main{background:var(--gold-soft);color:#7a5408}
+    .mskills .mearn{background:none;padding:0 2px;font-size:16px}
+    .legend{display:none}
+    .allp > p .btn{width:100%}
+
+    /* v9 phone tweaks */
+    .browse{flex-direction:column;align-items:stretch;text-align:center;gap:12px;padding:16px}
+    .browse .bl b{font-size:19px}
+    .bpill{justify-content:center;font-size:16px;padding:13px 16px}
+    .steps{margin-bottom:0}
+    /* one row of 5 filter buttons that fits the screen */
+    .filters{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;overflow:visible;margin:4px 0 0;padding:0}
+    .fdd summary{flex-direction:column;justify-content:center;gap:1px;padding:8px 2px 7px;min-height:58px;border-radius:14px;font-size:12.5px;position:relative;white-space:nowrap}
+    .fdd summary .fe{font-size:20px;line-height:1.1}
+    .fdd summary .fv{display:none}
+    .fdd summary b{position:absolute;top:-7px;right:-4px;min-width:20px;font-size:11.5px;padding:1px 5px;margin:0}
+    .fmeta{margin:10px 2px 4px}
+    /* roomier list */
+    .tablewrap{border:0;background:none}
+    table.grid{border-spacing:0 10px}
+    .grid tr.grp td{background:none;color:var(--maroon);padding:14px 4px 0;font-size:17px;border:0}
+    .grid tbody tr:not(.grp) td:first-child{background:#fff;border:1.5px solid #f1e4da;border-radius:18px;padding:12px}
+    .grid tbody tr:not(.grp):hover{background:none}
+    .crow{display:flex;gap:12px;align-items:flex-start}
+    .thumb{display:grid;place-items:center;flex:none;width:64px;height:64px;border-radius:16px;background:var(--soft);position:relative}
+    .thumb svg{width:54px;height:auto}
+    .tbadge{position:absolute;right:-6px;bottom:-6px;width:26px;height:26px;border-radius:50%;background:var(--gold);display:grid;place-items:center;font-size:14px;box-shadow:0 2px 0 #b98a2a}
+    .ctext{min-width:0;flex:1;display:flex;flex-direction:column;gap:5px}
+    .cart{display:none}
+    .grid tbody tr:not(.grp) td:first-child a.cname{font-size:16.5px;line-height:1.3}
+    .ctext .sub{font-size:13px;margin:0}
+    .mskills{margin:2px 0 0}
+    .mskills .mearn{display:none}
+  }
+  @keyframes sheet{from{transform:translateY(100%)}to{transform:none}}
+  @keyframes fadein{from{opacity:0}to{opacity:1}}
+  @media (max-width:360px){
+    .hero h1{font-size:29px}
+    .step{font-size:12.5px}
+    .vname{font-size:10px}
+    .boosts{flex-direction:column}
+  }
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+<header>
+  <div class="brand"><span class="paw">🐾</span> Bobcat Course Match</div>
+  <nav class="nav">
+    <button class="navb" data-page="survey">📝 My match</button>
+    <button class="navb" data-page="all">🗂️ All courses</button>
+  </nav>
+</header>
+
+<main id="app"></main>
+<footer>Student prototype · course list from public Coursera and Texas State pages, Nov 2026</footer>
+
+<script>
+/* ============================================================
+   1) SKILL AREAS  — the things the survey scores you on
+   ============================================================ */
+const SKILLS = {
+  lead:  {short:"Leading", name:"Leadership",                 e:"🦁", tip:"taking charge, making decisions, guiding a group"},
+  team:  {short:"Teamwork", name:"Collaboration & Community",  e:"🤝", tip:"working with others and getting involved"},
+  comm:  {short:"Talking", name:"Communication",              e:"🎤", tip:"presenting, writing, telling your story"},
+  make:  {short:"Building", name:"Hands-on Tech & Making",     e:"🛠️", tip:"building, designing, and using tech tools"},
+  data:  {short:"Data", name:"Data & Digital Skills",      e:"📊", tip:"spreadsheets, coding, analysis, software"},
+  plan:  {short:"Planning", name:"Planning & Career Readiness",e:"🗓️", tip:"managing projects, time, and job prep"}
+};
+
+/* ============================================================
+   2) QUESTIONS — 2 per skill area, answered 1 to 5
+      short = the label shown in the progress list
+   ============================================================ */
+const SCALE = [["😬","Not me at all"],["🤔","A little"],["🙂","Somewhat"],["😄","Mostly"],["🤩","Totally me"]];
+const QUESTIONS = [
+  {s:"lead", e:"🦁", short:"Taking the lead",     q:"I'm comfortable taking the lead when a group needs direction."},
+  {s:"team", e:"🤝", short:"Working with others", q:"I work well with people who think differently than I do."},
+  {s:"comm", e:"🎤", short:"Presenting",          q:"I can explain my ideas clearly when I present to a group."},
+  {s:"make", e:"🛠️", short:"Building things",     q:"I can take an idea and build a real thing from it (a model, a device, a video, an app)."},
+  {s:"data", e:"📊", short:"Using data",          q:"I'm comfortable using data — spreadsheets, charts, or code — to answer a question."},
+  {s:"plan", e:"🗓️", short:"Finishing projects",  q:"I can break a big project into steps and finish it on time."},
+  {s:"lead", e:"🏅", short:"Leadership roles",    q:"I've held a leadership role (officer, captain, shift lead, team lead)."},
+  {s:"team", e:"🏘️", short:"Getting involved",    q:"I'm involved in campus or community groups outside of class or work."},
+  {s:"comm", e:"✍️", short:"Professional writing",q:"I'm confident writing professional emails, reports, or a resume."},
+  {s:"make", e:"🖨️", short:"Maker tools",         q:"I've used maker tools like 3D printers, design software, or editing software."},
+  {s:"data", e:"💻", short:"Learning new tools",  q:"I pick up new software or digital tools quickly."},
+  {s:"plan", e:"💼", short:"Job-ready skills",    q:"I know what skills employers in my field want, and I can prove I have them."}
+];
+
+const ROLES = [
+  {id:"student", e:"🎒", label:"Student"},
+  {id:"staff",   e:"🏫", label:"Faculty or staff"},
+];
+const CERT_COUNTS = [["🌱","None yet"],["🌿","1 or 2"],["🌳","3 or more"]];
+
+const INTERESTS = [
+  {id:"electronics", label:"🔌 Electronics & circuit boards (PCBs)"},
+  {id:"code",        label:"👩‍💻 Coding & IT"},
+  {id:"datasci",     label:"📈 Data analysis"},
+  {id:"ai",          label:"🤖 Using AI tools"},
+  {id:"excel",       label:"📗 Excel & spreadsheets"},
+  {id:"security",    label:"🔐 Cybersecurity"},
+  {id:"pm",          label:"📋 Managing projects & people"},
+  {id:"speaking",    label:"🗣️ Public speaking"},
+  {id:"teamwork",    label:"🤝 Teamwork"},
+  {id:"time",        label:"⏰ Time management"},
+  {id:"design",      label:"🎨 Designing apps & websites (UX)"},
+  {id:"marketing",   label:"📣 Marketing & social media"},
+  {id:"business",    label:"🧑‍💼 HR & business"},
+  {id:"3d",          label:"🧊 3D design & 3D printing"},
+  {id:"media",       label:"🎬 Video, audio & content creation"},
+  {id:"xr",          label:"🕶️ VR / AR / game development"},
+  {id:"maps",        label:"🗺️ Maps & location data (GIS)"},
+  {id:"research",    label:"🔬 Research skills"}
+];
+
+/* ============================================================
+   3) CREDENTIAL CATALOG — EDIT THIS LIST to add/remove offerings
+      builds: which skill areas it grows
+      tags:   which interests it matches
+      who:    "student", "staff", or "all"
+      art:    the emoji picture on its card
+      earns:  "badge", "certificate", or "" if it gives no credential
+      The FIRST skill in builds is its main skill (bigger growth, big star).
+   ============================================================ */
+const LIB = "https://www.library.txst.edu/services/technology/micro-credentialing-program.html";
+/* Coursera links: a direct course link when we know it, otherwise a Coursera search for the name */
+const CS = n => "https://www.coursera.org/search?query=" + encodeURIComponent(n);
+const CL = slug => "https://www.coursera.org/learn/" + slug;
+/* TXST's free Coursera login pages (from txst.edu/microcredentials) */
+const LOGIN = {
+  student:"https://coursera.org/programs/career-academy-for-students-ub3f5?attemptSSOLogin=true",
+  staff:"https://coursera.org/programs/career-academy-for-faculty-staff-2epf6?attemptSSOLogin=true"
+};
+const G1="Coursera · Career certificates", G2="Coursera · Electronics & hardware", G3="Coursera · People skills",
+      G4="Coursera · Quick guided projects", G5="Texas State in person";
+const PC="Professional Certificate", CO="Course", GP="Guided Project";
+/* src: "coursera" or "txst"   seen: true = listed on TXST's own Coursera page
+   pic: which drawing from PICS (below) shows on the card
+   hrs: about how many total hours it takes. Most are rough estimates; check the course page. */
+const CATALOG = [
+  // ---------- Coursera: career certificates ----------
+  {src:"coursera", grp:G1, name:"Google Project Management", hrs:120, pic:"checklist", by:"Google", type:PC, seen:true, art:"📋✅", earns:"certificate", who:"all",
+   builds:["plan","lead","team"], tags:["pm"], what:"Plan, run, and finish projects with a team."},
+  {src:"coursera", grp:G1, name:"Google Data Analytics", hrs:120, pic:"chart", by:"Google", type:PC, art:"📊🔎", earns:"certificate", who:"all",
+   builds:["data"], tags:["datasci","excel"], what:"Clean, analyze, and chart data to answer real questions."},
+  {src:"coursera", grp:G1, name:"IBM Data Science", hrs:120, pic:"trend", by:"IBM", type:PC, art:"🐍📈", earns:"certificate", who:"all",
+   builds:["data"], tags:["datasci","code"], what:"Python, SQL, and machine learning basics."},
+  {src:"coursera", grp:G1, name:"Google UX Design", hrs:120, pic:"phone", by:"Google", type:PC, art:"🎨📱", earns:"certificate", who:"all",
+   builds:["make","comm"], tags:["design"], what:"Design apps and websites people can actually use."},
+  {src:"coursera", grp:G1, name:"Google Cybersecurity", hrs:120, pic:"shield", by:"Google", type:PC, art:"🔐🛡️", earns:"certificate", who:"all",
+   builds:["data"], tags:["security","code"], what:"Protect networks, devices, and data from attacks."},
+  {src:"coursera", grp:G1, name:"Google IT Support", hrs:120, pic:"laptop", by:"Google", type:PC, art:"🖥️🔧", earns:"certificate", who:"all",
+   builds:["data","plan"], tags:["code"], what:"Troubleshooting, networking, and operating systems."},
+  {src:"coursera", grp:G1, name:"Google Digital Marketing & E-commerce", hrs:120, pic:"megaphone", by:"Google", type:PC, art:"📣🛒", earns:"certificate", who:"all",
+   builds:["comm","data"], tags:["marketing"], what:"Reach an audience online and measure what works."},
+  {src:"coursera", grp:G1, name:"HRCI Human Resource Associate", hrs:60, pic:"idcard", by:"HRCI", type:PC, seen:true, art:"🧑‍💼🤝", earns:"certificate", who:"all",
+   builds:["team","plan","comm"], tags:["business"], what:"The basics of hiring, supporting, and managing people at work."},
+  {src:"coursera", grp:G1, name:"Unilever Supply Chain Data Analyst", hrs:60, pic:"truck", by:"Unilever", type:PC, seen:true, art:"🚚📦", earns:"certificate", who:"all",
+   builds:["data","plan"], tags:["business","datasci"], what:"Use data to keep products moving from factory to shelf."},
+
+  // ---------- Coursera: electronics & hardware ----------
+  {src:"coursera", grp:G2, name:"Mastering KiCAD: Open-Source PCB Design for Beginners", hrs:3, pic:"pcb", by:"Starweaver", type:CO, art:"🔌🔧", earns:"certificate", who:"all",
+   builds:["make"], tags:["electronics"], url:CL("mastering-kicad-open-source-pcb-design-for-beginners"),
+   what:"Design a real circuit board step by step in free KiCAD software."},
+  {src:"coursera", grp:G2, name:"From Schematic to PCB: Layout Fundamentals", hrs:4, pic:"schematic", by:"Starweaver", type:CO, art:"📐🔌", earns:"certificate", who:"all",
+   builds:["make","plan"], tags:["electronics"], url:CL("from-schematic-to-pcb-layout-fundamentals"),
+   what:"Turn a circuit drawing into a board that can actually be manufactured."},
+  {src:"coursera", grp:G2, name:"Learn the Art and Science of PCB Design with Eagle", hrs:8, pic:"pcb2", by:"Packt", type:CO, art:"🖥️🔌", earns:"certificate", who:"all",
+   builds:["make"], tags:["electronics"], what:"Beginner-friendly PCB layout using Eagle software."},
+  {src:"coursera", grp:G2, name:"Introduction to Electronics", hrs:45, pic:"bulb", by:"Georgia Tech", type:CO, art:"💡🔋", earns:"certificate", who:"all",
+   builds:["make","data"], tags:["electronics"], what:"Diodes, transistors, and op amps: how the basic parts work."},
+  {src:"coursera", grp:G2, name:"Introduction to FPGA Design for Embedded Systems", hrs:18, pic:"chip", by:"University of Colorado Boulder", type:CO, art:"⚡🧠", earns:"certificate", who:"all",
+   builds:["make","data"], tags:["electronics","code"], url:CL("intro-fpga-design-embedded-systems"),
+   what:"Build digital hardware designs on programmable chips."},
+  {src:"coursera", grp:G2, name:"Introduction to the Internet of Things and Embedded Systems", hrs:11, pic:"wifi", by:"UC Irvine", type:CO, art:"📡🏠", earns:"certificate", who:"all",
+   builds:["make","data"], tags:["electronics","code"], what:"How small connected devices are built and programmed."},
+
+  // ---------- Coursera: people skills ----------
+  {src:"coursera", grp:G3, name:"Introduction to Public Speaking", hrs:15, pic:"mic", by:"University of Washington", type:CO, art:"🎤✨", earns:"certificate", who:"all",
+   builds:["comm","lead"], tags:["speaking"], url:CL("public-speaking"),
+   what:"Plan and give clear talks, and get past the nerves."},
+  {src:"coursera", grp:G3, name:"Inspiring and Motivating Individuals", hrs:20, pic:"trophy", by:"University of Michigan", type:CO, art:"🙌🔥", earns:"certificate", who:"all",
+   builds:["lead","team"], tags:["pm"], url:CL("motivate-people-teams"),
+   what:"Set a vision and goals that get a team moving."},
+  {src:"coursera", grp:G3, name:"Teamwork Skills: Communicating Effectively in Groups", hrs:12, pic:"team", by:"University of Colorado Boulder", type:CO, art:"🤝💬", earns:"certificate", who:"all",
+   builds:["team","comm"], tags:["teamwork"], url:CL("teamwork-skills-effective-communication"),
+   what:"Work better in groups and get better group results."},
+  {src:"coursera", grp:G3, name:"Work Smarter, Not Harder: Time Management for Personal & Professional Productivity", hrs:10, pic:"clock", by:"UC Irvine", type:CO, art:"⏰✅", earns:"certificate", who:"all",
+   builds:["plan"], tags:["time"], what:"Set priorities, plan your week, and stop putting things off."},
+  {src:"coursera", grp:G3, name:"Google AI Essentials", hrs:5, pic:"robot", by:"Google", type:CO, art:"🤖💡", earns:"certificate", who:"all",
+   builds:["data","plan"], tags:["ai"], what:"Use AI tools to get everyday work done faster."},
+
+  // ---------- Coursera: quick guided projects (all listed on TXST's Coursera page) ----------
+  {src:"coursera", grp:G4, name:"Introduction to Project Management", hrs:2, pic:"calendar", by:"Coursera", type:GP, seen:true, art:"🗓️🚀", earns:"certificate", who:"all",
+   builds:["plan"], tags:["pm"], what:"A quick hands-on start to planning a project."},
+  {src:"coursera", grp:G4, name:"Excel for Beginners: Introduction to Spreadsheets", hrs:2, pic:"grid", by:"Coursera", type:GP, seen:true, art:"📗🔢", earns:"certificate", who:"all",
+   builds:["data"], tags:["excel"], what:"Learn spreadsheets from zero by building one."},
+  {src:"coursera", grp:G4, name:"Data Visualization in Tableau: Create Dashboards and Stories", hrs:2, pic:"dashboard", by:"Coursera", type:GP, seen:true, art:"📊🎨", earns:"certificate", who:"all",
+   builds:["data","comm"], tags:["datasci"], what:"Turn numbers into charts that tell a story."},
+  {src:"coursera", grp:G4, name:"Aggregate Data in SQL using MySQL Workbench", hrs:2, pic:"database", by:"Coursera", type:GP, seen:true, art:"🗄️🔎", earns:"certificate", who:"all",
+   builds:["data"], tags:["datasci","code"], what:"Practice pulling totals and averages out of a database."},
+  {src:"coursera", grp:G4, name:"Change Leadership: Strategic Route Analysis with Miro", hrs:2, pic:"route", by:"Coursera", type:GP, seen:true, art:"🧭🗺️", earns:"certificate", who:"all",
+   builds:["lead","plan"], tags:["pm"], what:"Map out how to lead a team through a change."},
+  {src:"coursera", grp:G4, name:"Managing Teams Documents and Files", hrs:2, pic:"folder", by:"Coursera", type:GP, seen:true, art:"📁👥", earns:"certificate", who:"all",
+   builds:["team","data"], tags:["teamwork","business"], what:"Keep a team's shared files organized in Microsoft Teams."},
+
+  // ---------- Texas State, in person ----------
+  {src:"txst", grp:G5, name:"Design to Fabrication", hrs:6, pic:"cube", art:"✏️🧊", earns:"badge", by:"Alkek One", type:"Micro-credential badge", who:"all",
+   builds:["make","plan"], tags:["3d"], url:LIB,
+   what:"Take a 3D object from sketch to finished product in the Alkek MakerSpace."},
+  {src:"txst", grp:G5, name:"Blender 3D Bootcamp", hrs:8, pic:"shapes", art:"🤖🧊", earns:"badge", by:"Alkek One", type:"Micro-credential badge", who:"all",
+   builds:["make"], tags:["3d","xr"], url:LIB,
+   what:"Beginner-friendly 3D modeling and animation workshop."},
+  {src:"txst", grp:G5, name:"Unity XR Development", hrs:14, pic:"headset", art:"🕶️🎮", earns:"badge", by:"Alkek One", type:"Micro-credential badge", who:"all",
+   builds:["make","data"], tags:["xr","code"], url:LIB,
+   what:"Build virtual, augmented, and mobile apps in Unity."},
+  {src:"txst", grp:G5, name:"Discovering GIS", hrs:8, pic:"map", art:"🗺️📍", earns:"badge", by:"Alkek One", type:"Micro-credential badge", who:"all",
+   builds:["data","comm"], tags:["maps","datasci"], url:LIB,
+   what:"Map and analyze location data with ArcGIS Pro."},
+  {src:"txst", grp:G5, name:"Intro to Video and Audio Editing", hrs:6, pic:"play", art:"🎬🎧", earns:"badge", by:"Alkek One", type:"Micro-credential badge", who:"all",
+   builds:["comm","make"], tags:["media","marketing"], url:LIB,
+   what:"Edit video and audio with Adobe Premiere tools."},
+  {src:"txst", grp:G5, name:"Virtual Production & Filmmaking Best Practices", hrs:6, pic:"camera", art:"🎥🌆", earns:"badge", by:"Alkek One", type:"Micro-credential badge", who:"all",
+   builds:["comm","make","team"], tags:["media"], url:LIB,
+   what:"Film in the virtual production studio and learn how a crew works together."},
+  {src:"txst", grp:G5, name:"Bobcats LEAD", hrs:10, pic:"flag", art:"🦁🤝", earns:"", by:"Student Involvement", type:"Leadership program", who:"student",
+   builds:["lead","team"], tags:["pm","teamwork"], url:"https://studentinvolvement.txst.edu/l-s/lead/bobcatslead.html",
+   what:"Learn leadership basics in small groups and pitch a project that boosts student involvement."},
+  {src:"txst", grp:G5, name:"Leadership Academy Certificate", hrs:30, pic:"compass", art:"🏫🧭", earns:"certificate", by:"Human Resources", type:"Certificate program", who:"staff",
+   builds:["lead","team","comm"], tags:["pm"], url:"https://www.hr.txst.edu/odc/employee-certificates/leadership-essentials.html",
+   what:"Professional development program for aspiring and early-career faculty and staff leaders."}
+];
+CATALOG.forEach(c=>{ if(!c.url) c.url = CS(c.name); });
+/* time: shown as real hours, and grouped into these brackets for the filter */
+const HOURS = [["u10","Under 10 hours",x=>x<10], ["u20","10–20 hours",x=>x>=10&&x<20], ["u50","20–50 hours",x=>x>=20&&x<50], ["o50","50+ hours",x=>x>=50]];
+const hrsText = c => c.hrs>=100 ? "100+ hrs" : "~"+c.hrs+" hrs";
+const hrsBucket = c => HOURS.find(b=>b[2](c.hrs))[0];
+
+/* ============================================================
+   VISIT COUNTER (optional, anonymous)
+   1. Make a free account at goatcounter.com and pick a code, e.g. "bobcatmatch"
+   2. Put that code between the quotes below and upload to GitHub
+   3. See your numbers at https://YOURCODE.goatcounter.com
+   GoatCounter does not use cookies and does not store IP addresses.
+   It only counts visits and the anonymous events below
+   (start, role, finished, interests, no-match topics, course clicks, PDF).
+   Nothing is counted while this is empty.
+   ============================================================ */
+const GOATCOUNTER_CODE = "";
+if(GOATCOUNTER_CODE){
+  const s = document.createElement("script");
+  s.async = true; s.src = "https://gc.zgo.at/count.js";
+  s.setAttribute("data-goatcounter", `https://${GOATCOUNTER_CODE}.goatcounter.com/count`);
+  document.head.appendChild(s);
+}
+function track(name){
+  try{ if(window.goatcounter && window.goatcounter.count) window.goatcounter.count({path:name, title:name, event:true}); }catch(e){}
+}
+
+/* ============================================================
+   4) APP LOGIC
+   ============================================================ */
+const app = document.getElementById("app");
+const NQ = QUESTIONS.length, TOTAL = NQ + 3;       // + role, badge count, interests
+const state = {step:"home", i:0, answers:Array(NQ).fill(null), role:null, certs:null, interests:new Set(), justDone:-1, page:"survey"};
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* the list shown in the progress sidebar */
+const STEPS = [{e:"👋", short:"About you"}]
+  .concat(QUESTIONS.map(q=>({e:q.e, short:q.short})))
+  .concat([{e:"🏆", short:"Your badges so far"},{e:"✨", short:"What you want to learn"}]);
+
+function isDone(i){
+  if(i===0) return !!state.role;
+  if(i<=NQ) return state.answers[i-1]!==null;
+  if(i===NQ+1) return state.certs!==null;
+  return state.interests.size>0;
+}
+const doneCount = () => STEPS.filter((_,i)=>isDone(i)).length;
+
+function go(step,i,animate=true){
+  state.step=step; if(i!==undefined) state.i=i;
+  render(animate); if(animate) window.scrollTo({top:0,behavior:"smooth"});
+}
+function render(animate){
+  document.querySelectorAll(".navb").forEach(b=>b.classList.toggle("on", b.dataset.page===state.page));
+  if(state.page==="all") return allPage();
+  if(state.step==="home") return home();
+  if(state.step==="quiz") return quiz(animate);
+  results();
+}
+
+/* the "earn a certificate" banner, used on the first page and the results page */
+function certbar(){
+  return `<div class="certbar">
+      <div class="seal">🏅</div>
+      <div class="cb-main"><b class="t">Earn a certificate. Show it off.</b>
+        <div class="chips2"><span>💼 LinkedIn</span><span>📄 Résumé</span><span>🗂️ Portfolio</span></div></div>
+      <a class="btn" href="${LOGIN[state.role]||LOGIN.student}" target="_blank" rel="noopener">🔑 Log in free with TXST</a>
+    </div>`;
+}
+
+/* big button that goes to the All courses tab. It looks like the tab button, and its arrow keeps sliding right. */
+function browseAll(){
+  return `<button class="browse" type="button" data-goall>
+      <span class="bl"><b>Don't limit yourself 👀</b><small>See all ${CATALOG.length} courses you could take</small></span>
+      <span class="bpill">🗂️ All courses <span class="barrow">→</span></span>
+    </button>`;
+}
+function wireBrowse(){ app.querySelectorAll("[data-goall]").forEach(b=>b.onclick=()=>setPage("all")); }
+
+function home(){
+  app.innerHTML = `
+  <div style="margin-bottom:20px">${certbar()}</div>
+  <div class="card hero">
+    <div>
+      <h1>Free Coursera courses, picked for <em>you</em>.</h1>
+      <button class="btn" id="start">Start 🚀</button>
+      <p class="small muted" style="margin-top:16px">⏱️ 3 min</p>
+    </div>
+    <div class="mascot">🐾</div>
+  </div>
+  <div class="steps">
+    <div class="step"><div class="e">👆</div>Tap answers</div>
+    <div class="step"><div class="e">📊</div>See your skills</div>
+    <div class="step"><div class="e">🎯</div>Get your courses</div>
+  </div>
+  ${browseAll()}`;
+  wireBrowse();
+  document.getElementById("start").onclick = ()=>{ track("start"); go("quiz",0); };
+}
+
+function quiz(animate){
+  const i = state.i, n = doneCount(), all = n===TOTAL;
+  let body;
+  if(i===0){
+    body = `<div class="q-emoji">👋</div><div class="q-kicker">First things first</div>
+      <div class="q-text">Hi! Which one are you?</div>
+      <div class="opts">${ROLES.map(r=>opt(r.e, r.label, state.role===r.id, `role:${r.id}`)).join("")}</div>`;
+  } else if(i<=NQ){
+    const k=i-1, Q=QUESTIONS[k];
+    body = `<div class="q-emoji">${Q.e}</div><div class="q-kicker">${SKILLS[Q.s].name}</div>
+      <div class="q-text">${esc(Q.q)}</div>
+      <div class="faces">${SCALE.map((t,x)=>opt(t[0], t[1], state.answers[k]===x+1, `ans:${x+1}`)).join("")}</div>`;
+  } else if(i===NQ+1){
+    body = `<div class="q-emoji">🏆</div><div class="q-kicker">Almost there</div>
+      <div class="q-text">How many certificates or badges do you have?</div>
+      <div class="opts">${CERT_COUNTS.map((t,x)=>opt(t[0], t[1], state.certs===x, `cert:${x}`)).join("")}</div>`;
+  } else {
+    const missing = STEPS.map((s,x)=>x).filter(x=>!isDone(x) && x!==i);
+    body = `<div class="q-emoji">✨</div><div class="q-kicker">Last one</div>
+      <div class="q-text">What do you want to learn?</div>
+      <div class="muted">Pick any.</div>
+      <div class="chips">${INTERESTS.map(t=>opt("", t.label, state.interests.has(t.id), `int:${t.id}`)).join("")}</div>
+      <div class="finish"><button class="btn" id="finish" ${all?"":"disabled"}>Show my courses 🎉</button>
+      ${missing.length?`<span class="small muted">${missing.length} left ⬅️</span>`:""}</div>`;
+  }
+  const list = STEPS.map((s,x)=>{
+    const d=isDone(x), now=x===i;
+    return `<li><button class="qi ${d?"done":""} ${now?"now":""}" data-go="${x}">
+      <span class="ic ${x===state.justDone?"pop":""}">${now?s.e:d?"✓":x+1}</span><span class="lbl">${esc(s.short)}</span></button></li>`;
+  }).join("");
+  state.justDone=-1;
+
+  app.innerHTML = `<div class="quiz">
+    <aside class="side">
+      <h3>Your progress</h3>
+      <div class="count">${n} / ${TOTAL}</div>
+      <div class="track"><i style="width:${n/TOTAL*100}%"></i></div>
+      <ol class="qlist">${list}</ol>
+    </aside>
+    <section class="card stage ${animate?"in":""}">
+      ${body}
+
+    </section></div>`;
+
+  app.querySelectorAll(".opt").forEach(b=>b.onclick=()=>pick(b.dataset.v));
+  app.querySelectorAll(".qi").forEach(b=>b.onclick=()=>go("quiz",+b.dataset.go));
+  const f=document.getElementById("finish"); if(f) f.onclick=()=>{
+    track("finished/"+(state.role||"unknown"));
+    state.interests.forEach(t=>track("interest/"+t));
+    const tags = new Set(CATALOG.flatMap(c=>c.tags));
+    state.interests.forEach(t=>{ if(!tags.has(t)) track("no-match/"+t); });
+    go("results");
+  };
+  const now=app.querySelector(".qi.now"); if(now&&now.scrollIntoView) now.scrollIntoView({block:"nearest",inline:"center"});
+}
+function opt(face,label,on,v){
+  return `<button class="opt ${on?"on":""}" data-v="${v}">${face?`<span class="f">${face}</span>`:""}<span>${esc(label)}</span></button>`;
+}
+function pick(v){
+  const [kind,val] = v.split(":"), at = state.i;
+  if(kind==="role"){ state.role=val; track("role/"+val); }
+  if(kind==="ans")  state.answers[at-1]=+val;
+  if(kind==="cert") state.certs=+val;
+  if(kind==="int"){ state.interests.has(val)?state.interests.delete(val):state.interests.add(val); return render(false); }
+  state.justDone = at;
+  render(false);                                   // show the pick + the new checkmark
+  setTimeout(()=>{ if(state.step==="quiz" && state.i===at) go("quiz",at+1); },380);   // then slide on
+}
+
+/* ---- scoring: each skill = average of its answers, turned into 0–100 ---- */
+function scores(){
+  const sum={}, n={};
+  QUESTIONS.forEach((Q,k)=>{ sum[Q.s]=(sum[Q.s]||0)+state.answers[k]; n[Q.s]=(n[Q.s]||0)+1; });
+  const out={};
+  for(const s in SKILLS) out[s]=Math.round((sum[s]/n[s]-1)/4*100);
+  return out;
+}
+
+/* ---- matching: a credential ranks higher when it builds your weaker
+        skills and matches the interests you picked ---- */
+function recommend(sc){
+  return CATALOG
+    .filter(c=>c.who==="all"||c.who===state.role)
+    .map(c=>{
+      const need = c.builds.reduce((a,s)=>a+(100-sc[s]),0)/c.builds.length;      // 0–100
+      const hits = c.tags.filter(t=>state.interests.has(t));
+      const weakest = c.builds.slice().sort((a,b)=>sc[a]-sc[b])[0];
+      return {...c, hits, weakest, score: need*0.5 + hits.length*35};
+    })
+    .sort((a,b)=>b.score-a.score);
+}
+
+/* how many points a course could add to a skill (an estimate):
+   up to +25 for its main skill, +15 for the others, never past 100 */
+function gain(c,s,sc){ return Math.min(100-sc[s], s===c.builds[0]?25:15); }
+const ART_BG = [["#ffe1b3","#ffc2c2"],["#d9f2e4","#fff0b8"],["#ffd6e0","#ffe9c4"],["#dfe9ff","#ffe1ef"],["#fff0b8","#ffd0b0"]];
+const EARN = {badge:"🏅 Earns a badge", certificate:"📜 Earns a certificate"};
+
+/* each skill gets its own color so cards look different at a glance */
+const SKILL_COLOR = {lead:["#e07a12","#ffe8cc"], team:["#d9437a","#ffe0ec"], comm:["#7c4ddb","#ebe4ff"],
+                     make:["#0f9686","#d6f5f0"], data:["#2f6fe0","#dde9ff"], plan:["#4c8f22","#e4f5d4"]};
+
+/* small drawings for the top of each card. C = the card's own color. */
+const C = "var(--c)";
+const PICS = {
+  pcb:`<rect x="20" y="14" width="80" height="62" rx="8" fill="#2e9e5b"/><rect x="46" y="32" width="28" height="26" rx="3" fill="#1f7a4d"/><path d="M46 38H30V24M46 52H30V66M74 38h16V24M74 52h16v14M60 32V20M60 58v12" stroke="#f6d365" stroke-width="3" fill="none" stroke-linecap="round"/><g fill="#f6d365"><circle cx="30" cy="24" r="3.5"/><circle cx="30" cy="66" r="3.5"/><circle cx="90" cy="24" r="3.5"/><circle cx="90" cy="66" r="3.5"/><circle cx="60" cy="20" r="3.5"/><circle cx="60" cy="70" r="3.5"/></g>`,
+  schematic:`<rect x="10" y="18" width="46" height="54" rx="5" fill="#fff"/><path d="M16 45h6l3-7 5 14 5-14 5 14 3-7h7" stroke="${C}" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round"/><path d="M60 45h10m-4-5 5 5-5 5" stroke="${C}" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/><rect x="76" y="24" width="36" height="42" rx="5" fill="#2e9e5b"/><rect x="86" y="36" width="16" height="16" rx="2" fill="#1f7a4d"/><g fill="#f6d365"><circle cx="82" cy="30" r="2.5"/><circle cx="106" cy="30" r="2.5"/><circle cx="82" cy="60" r="2.5"/><circle cx="106" cy="60" r="2.5"/></g>`,
+  pcb2:`<rect x="16" y="20" width="88" height="50" rx="8" fill="#2e9e5b"/><rect x="26" y="30" width="22" height="14" rx="2" fill="#1f7a4d"/><rect x="70" y="44" width="24" height="16" rx="2" fill="#1f7a4d"/><path d="M48 37h14v15h8M37 44v14h20" stroke="#f6d365" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/><g fill="#f6d365"><circle cx="57" cy="58" r="3.5"/><circle cx="92" cy="30" r="3.5"/><circle cx="26" cy="60" r="3.5"/></g>`,
+  bulb:`<circle cx="60" cy="38" r="22" fill="#ffd95a"/><rect x="50" y="56" width="20" height="14" rx="3" fill="#9aa6c4"/><path d="M52 40l5-8 6 10 5-8" stroke="#b8860b" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M60 6v6M28 38h-7M99 38h-7M36 16l5 5M84 16l-5 5" stroke="${C}" stroke-width="3" stroke-linecap="round"/>`,
+  chip:`<path d="M36 32H26M36 45H26M36 58H26M84 32h10M84 45h10M84 58h10M48 22V12M60 22V12M72 22V12M48 68v10M60 68v10M72 68v10" stroke="#b9c2d8" stroke-width="4" stroke-linecap="round"/><rect x="36" y="22" width="48" height="46" rx="6" fill="#7d8fb8"/><rect x="48" y="34" width="24" height="22" rx="3" fill="${C}"/>`,
+  wifi:`<rect x="40" y="56" width="40" height="24" rx="6" fill="#fff"/><circle cx="52" cy="68" r="4" fill="${C}"/><circle cx="68" cy="68" r="4" fill="#ffd95a"/><path d="M44 38a22 22 0 0 1 32 0M36 28a34 34 0 0 1 48 0M52 47a10 10 0 0 1 16 0" stroke="${C}" stroke-width="4" fill="none" stroke-linecap="round"/>`,
+  mic:`<rect x="50" y="10" width="20" height="38" rx="10" fill="${C}"/><path d="M42 36a18 18 0 0 0 36 0" stroke="#9aa6c4" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M60 54v16M46 72h28" stroke="#9aa6c4" stroke-width="4" stroke-linecap="round"/><path d="M24 26c-4 6-4 14 0 20M96 26c4 6 4 14 0 20" stroke="${C}" stroke-width="3" fill="none" stroke-linecap="round" opacity=".6"/>`,
+  checklist:`<rect x="30" y="10" width="60" height="70" rx="8" fill="#fff"/><rect x="48" y="5" width="24" height="12" rx="4" fill="#aab4cf"/><path d="M38 32l4 4 7-8M38 48l4 4 7-8" stroke="#3b8a64" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><rect x="56" y="29" width="26" height="5" rx="2.5" fill="${C}" opacity=".5"/><rect x="56" y="45" width="20" height="5" rx="2.5" fill="${C}" opacity=".5"/><rect x="38" y="59" width="10" height="10" rx="2" fill="none" stroke="#bbb" stroke-width="2.5"/><rect x="56" y="61" width="24" height="5" rx="2.5" fill="#ddd"/>`,
+  calendar:`<rect x="26" y="16" width="68" height="60" rx="8" fill="#fff"/><path d="M26 24a8 8 0 0 1 8-8h52a8 8 0 0 1 8 8v10H26z" fill="${C}"/><path d="M42 10v12M78 10v12" stroke="#9aa6c4" stroke-width="4" stroke-linecap="round"/><g fill="#ddd"><rect x="36" y="42" width="10" height="9" rx="2"/><rect x="55" y="42" width="10" height="9" rx="2"/><rect x="74" y="42" width="10" height="9" rx="2"/><rect x="36" y="58" width="10" height="9" rx="2"/></g><rect x="55" y="58" width="10" height="9" rx="2" fill="${C}"/><path d="M73 62l4 4 8-9" stroke="#3b8a64" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`,
+  chart:`<rect x="18" y="12" width="84" height="66" rx="8" fill="#fff"/><rect x="28" y="48" width="12" height="20" rx="2" fill="${C}" opacity=".45"/><rect x="46" y="36" width="12" height="32" rx="2" fill="${C}" opacity=".7"/><rect x="64" y="42" width="12" height="26" rx="2" fill="${C}" opacity=".55"/><rect x="82" y="24" width="12" height="44" rx="2" fill="${C}"/>`,
+  trend:`<rect x="18" y="12" width="84" height="66" rx="8" fill="#fff"/><path d="M28 62l16-14 14 8 16-22 18-8" stroke="${C}" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><g fill="${C}"><circle cx="28" cy="62" r="4"/><circle cx="44" cy="48" r="4"/><circle cx="58" cy="56" r="4"/><circle cx="74" cy="34" r="4"/><circle cx="92" cy="26" r="4"/></g>`,
+  phone:`<rect x="40" y="6" width="40" height="78" rx="8" fill="#7d8fb8"/><rect x="44" y="14" width="32" height="60" rx="3" fill="#fff"/><rect x="48" y="18" width="24" height="14" rx="3" fill="${C}"/><rect x="48" y="36" width="24" height="5" rx="2.5" fill="#ddd"/><rect x="48" y="45" width="16" height="5" rx="2.5" fill="#ddd"/><rect x="48" y="58" width="24" height="10" rx="5" fill="${C}" opacity=".6"/>`,
+  shield:`<path d="M60 8l30 10v22c0 20-13 34-30 42-17-8-30-22-30-42V18z" fill="${C}"/><path d="M52 40v-6a8 8 0 0 1 16 0v6" stroke="#fff" stroke-width="4" fill="none"/><rect x="48" y="40" width="24" height="20" rx="4" fill="#fff"/><circle cx="60" cy="50" r="3" fill="${C}"/>`,
+  laptop:`<rect x="28" y="16" width="64" height="44" rx="6" fill="#7d8fb8"/><rect x="33" y="21" width="54" height="34" rx="2" fill="#fff"/><path d="M18 64h84l-6 10H24z" fill="#aab4cf"/><path d="M50 48l13-13" stroke="${C}" stroke-width="5" stroke-linecap="round"/><circle cx="67" cy="31" r="6" fill="none" stroke="${C}" stroke-width="4"/>`,
+  megaphone:`<path d="M40 54l4 18h10l-4-16" fill="#9aa6c4"/><path d="M30 36h14l34-18v54L44 54H30z" fill="${C}"/><rect x="22" y="36" width="10" height="18" rx="3" fill="#9aa6c4"/><path d="M86 34c5 6 5 16 0 22M94 26c9 11 9 27 0 38" stroke="${C}" stroke-width="3.5" fill="none" stroke-linecap="round" opacity=".6"/>`,
+  idcard:`<rect x="22" y="20" width="76" height="52" rx="8" fill="#fff"/><rect x="52" y="12" width="16" height="12" rx="3" fill="#aab4cf"/><circle cx="44" cy="40" r="9" fill="${C}"/><path d="M30 64a14 12 0 0 1 28 0z" fill="${C}"/><rect x="66" y="36" width="24" height="5" rx="2.5" fill="#ddd"/><rect x="66" y="46" width="18" height="5" rx="2.5" fill="#ddd"/><rect x="66" y="56" width="22" height="5" rx="2.5" fill="#ddd"/>`,
+  truck:`<rect x="14" y="28" width="52" height="34" rx="4" fill="${C}"/><path d="M66 38h20l14 14v10H66z" fill="#9aa6c4"/><rect x="72" y="42" width="14" height="10" rx="2" fill="#cfe8ff"/><rect x="24" y="36" width="14" height="12" rx="2" fill="#fff" opacity=".6"/><rect x="42" y="36" width="14" height="12" rx="2" fill="#fff" opacity=".6"/><circle cx="32" cy="66" r="8" fill="#7d8fb8"/><circle cx="84" cy="66" r="8" fill="#7d8fb8"/><circle cx="32" cy="66" r="3" fill="#fff"/><circle cx="84" cy="66" r="3" fill="#fff"/>`,
+  trophy:`<path d="M42 18H28c0 14 6 20 16 20M78 18h14c0 14-6 20-16 20" stroke="#ffc83d" stroke-width="5" fill="none"/><path d="M42 12h36v20a18 18 0 0 1-36 0z" fill="#ffc83d"/><rect x="55" y="48" width="10" height="14" fill="#e0a800"/><rect x="42" y="62" width="36" height="10" rx="3" fill="#9aa6c4"/><path d="M60 16l3 6 6 1-4 5 1 6-6-3-6 3 1-6-4-5 6-1z" fill="#fff"/>`,
+  team:`<g fill="${C}" opacity=".55"><circle cx="28" cy="42" r="9"/><path d="M12 74a16 16 0 0 1 32 0z"/><circle cx="92" cy="42" r="9"/><path d="M76 74a16 16 0 0 1 32 0z"/></g><g fill="${C}"><circle cx="60" cy="30" r="12"/><path d="M38 76a22 22 0 0 1 44 0z"/></g>`,
+  clock:`<circle cx="60" cy="45" r="32" fill="#fff" stroke="${C}" stroke-width="6"/><path d="M60 26v19l13 9" stroke="#7d8fb8" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="60" cy="45" r="3.5" fill="#7d8fb8"/>`,
+  robot:`<path d="M60 26V14" stroke="#9aa6c4" stroke-width="4" stroke-linecap="round"/><circle cx="60" cy="11" r="5" fill="#ffd95a"/><rect x="34" y="26" width="52" height="42" rx="12" fill="${C}"/><circle cx="50" cy="44" r="6" fill="#fff"/><circle cx="70" cy="44" r="6" fill="#fff"/><rect x="50" y="56" width="20" height="5" rx="2.5" fill="#fff"/><path d="M100 12l2.5 6 6 2.5-6 2.5-2.5 6-2.5-6-6-2.5 6-2.5z" fill="#ffd95a"/>`,
+  grid:`<rect x="22" y="14" width="76" height="62" rx="6" fill="#fff"/><path d="M22 20a6 6 0 0 1 6-6h64a6 6 0 0 1 6 6v8H22z" fill="#1f8f4e"/><rect x="47" y="43" width="24" height="12" fill="#1f8f4e" opacity=".3"/><path d="M22 42h76M22 56h76M46 28v48M72 28v48" stroke="#cfd8d3" stroke-width="2.5"/>`,
+  dashboard:`<rect x="16" y="12" width="88" height="66" rx="8" fill="#fff"/><circle cx="40" cy="38" r="13" fill="none" stroke="#e6e6e6" stroke-width="8"/><circle cx="40" cy="38" r="13" fill="none" stroke="${C}" stroke-width="8" stroke-dasharray="52 82" transform="rotate(-90 40 38)"/><rect x="66" y="40" width="8" height="14" fill="${C}" opacity=".5"/><rect x="78" y="28" width="8" height="26" fill="${C}"/><rect x="90" y="34" width="8" height="20" fill="${C}" opacity=".7"/><path d="M26 70l14-6 12 4 16-8 12 5 14-7" stroke="${C}" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`,
+  database:`<path d="M34 24v42c0 6 12 10 26 10s26-4 26-10V24" fill="${C}"/><ellipse cx="60" cy="24" rx="26" ry="10" fill="#fff" stroke="${C}" stroke-width="3"/><path d="M34 38c0 6 12 10 26 10s26-4 26-10M34 52c0 6 12 10 26 10s26-4 26-10" stroke="#fff" stroke-width="3" fill="none"/>`,
+  route:`<path d="M22 70c20 0 12-22 34-22s16-16 40-16" stroke="${C}" stroke-width="4" fill="none" stroke-dasharray="2 9" stroke-linecap="round"/><circle cx="22" cy="70" r="7" fill="#9aa6c4"/><rect x="40" y="58" width="14" height="14" rx="2" fill="#ffd95a"/><rect x="62" y="50" width="14" height="14" rx="2" fill="#ff9fb5"/><path d="M96 6a10 10 0 0 1 10 10c0 8-10 16-10 16S86 24 86 16A10 10 0 0 1 96 6z" fill="${C}"/><circle cx="96" cy="16" r="4" fill="#fff"/>`,
+  folder:`<path d="M18 26a6 6 0 0 1 6-6h22l8 8h42a6 6 0 0 1 6 6v36a6 6 0 0 1-6 6H24a6 6 0 0 1-6-6z" fill="${C}"/><circle cx="50" cy="50" r="6" fill="#fff"/><circle cx="70" cy="50" r="6" fill="#fff"/><path d="M40 68a10 9 0 0 1 20 0zM60 68a10 9 0 0 1 20 0z" fill="#fff"/>`,
+  cube:`<path d="M54 12l32 16v34L54 78 22 62V28z" fill="${C}"/><path d="M54 12l32 16-32 16-32-16z" fill="#fff" opacity=".45"/><path d="M54 44v34l32-16V28z" fill="#000" opacity=".15"/><path d="M90 72l16-16 6 6-16 16-8 2z" fill="#ffc83d"/>`,
+  shapes:`<circle cx="30" cy="54" r="18" fill="${C}" opacity=".6"/><path d="M60 16l22 11v26L60 64 38 53V27z" fill="${C}"/><path d="M60 16l22 11-22 11-22-11z" fill="#fff" opacity=".4"/><path d="M96 34l14 40H82z" fill="#ffc83d"/>`,
+  headset:`<path d="M26 42c-10 0-8-24 34-24s44 24 34 24" stroke="#aab4cf" stroke-width="5" fill="none"/><rect x="24" y="30" width="72" height="36" rx="14" fill="#7d8fb8"/><rect x="32" y="39" width="24" height="18" rx="7" fill="${C}"/><rect x="64" y="39" width="24" height="18" rx="7" fill="${C}"/>`,
+  map:`<path d="M16 22l28-8 32 8 28-8v54l-28 8-32-8-28 8z" fill="#fff"/><path d="M44 14v54M76 22v54" stroke="#d8e2dc" stroke-width="3"/><path d="M60 20a14 14 0 0 1 14 14c0 11-14 24-14 24S46 45 46 34a14 14 0 0 1 14-14z" fill="${C}"/><circle cx="60" cy="34" r="5" fill="#fff"/>`,
+  play:`<rect x="18" y="8" width="84" height="50" rx="8" fill="#7d8fb8"/><path d="M52 22l22 11-22 11z" fill="#fff"/><rect x="18" y="66" width="84" height="8" rx="4" fill="#fff"/><rect x="18" y="66" width="40" height="8" rx="4" fill="${C}"/><circle cx="58" cy="70" r="7" fill="${C}"/>`,
+  camera:`<circle cx="36" cy="22" r="12" fill="${C}"/><circle cx="64" cy="22" r="12" fill="${C}"/><circle cx="36" cy="22" r="4" fill="#fff"/><circle cx="64" cy="22" r="4" fill="#fff"/><rect x="22" y="34" width="58" height="40" rx="6" fill="#7d8fb8"/><path d="M80 46l22-10v36l-22-10z" fill="#9aa6c4"/>`,
+  flag:`<path d="M10 80l34-44 16 20 14-16 36 40z" fill="${C}" opacity=".75"/><path d="M44 36V10" stroke="#9aa6c4" stroke-width="4" stroke-linecap="round"/><path d="M44 10h24l-7 8 7 8H44z" fill="#ffc83d"/>`,
+  compass:`<circle cx="60" cy="45" r="32" fill="#fff" stroke="${C}" stroke-width="6"/><path d="M74 31l-8 20-20 8 8-20z" fill="${C}"/><circle cx="60" cy="45" r="3.5" fill="#fff"/>`
+};
+const pic = k => `<svg viewBox="0 0 120 90" role="img" aria-hidden="true">${PICS[k]||PICS.trophy}</svg>`;
+
+/* one clickable card. The whole card is a real link to that course's own page. */
+function card(c,x,sc,rank){
+  const main = c.weakest, col = SKILL_COLOR[main];
+  // the 2 skills where this helps most, shown as big "+points" tiles
+  const tiles = c.builds.slice().sort((a,b)=>gain(c,b,sc)-gain(c,a,sc)).slice(0,2).map(s=>{
+    const g = gain(c,s,sc);
+    return `<div class="boost" title="${SKILLS[s].name}: ${sc[s]} now, about ${sc[s]+g} after">
+      <span class="be">${SKILLS[s].e}</span><span class="bn">${g>0?`<small>▲</small>+${g}`:"💯"}</span><span class="bl">${SKILLS[s].name}</span></div>`;
+  }).join("");
+  const earnIcon = {badge:"🏅", certificate:"📜"}[c.earns];
+  return `<a class="pick" href="${c.url}" target="_blank" rel="noopener" style="--c:${col[0]};--soft:${col[1]};animation-delay:${.12*x+.2}s">
+    <div class="art"><span class="rank">${rank}</span>${c.hits.length?'<span class="yours">✨ You asked</span>':""}${pic(c.pic)}</div>
+    <div class="pbody">
+      <h3>${esc(c.name)}</h3>
+      <div class="byline">${esc(c.by)}${c.seen?' <span class="ok" title="Listed on TXST\'s Coursera page">✓ TXST</span>':""} · ⏱️ ${hrsText(c)}</div>
+      <div class="boosts">${tiles}</div>
+    </div>
+    <div class="cta"><span class="go">${c.src==="coursera"?"Open on Coursera":"Open TXST page"} ↗</span>${earnIcon?`<span class="earnic" title="${EARN[c.earns].slice(3)}" aria-label="${EARN[c.earns].slice(3)}">${earnIcon}</span>`:""}</div>
+  </a>`;
+}
+
+function results(){
+  const sc = scores();
+  const order = Object.keys(SKILLS);
+  const sorted = order.slice().sort((a,b)=>sc[b]-sc[a]);
+  const top = sorted.slice(0,2), low = sorted.slice(-2).reverse();
+  const recs = recommend(sc);
+  const best = recs.filter(c=>c.src==="coursera").slice(0,6);     // Coursera first
+  const local = recs.filter(c=>c.src==="txst").slice(0,3);        // then TXST in person
+  const covered = new Set(recs.flatMap(c=>c.tags));
+  const gaps = INTERESTS.filter(t=>state.interests.has(t.id) && !covered.has(t.id));
+
+  const certMsg = [
+    "🌱 You haven't earned any yet. One is all it takes to get started.",
+    "🌿 You've got a start. One more in a growth area would round you out.",
+    "🌳 You already collect these. Aim your next one at a growth area, not a strength."
+  ][state.certs];
+
+  const chart = order.map(s=>{
+    const cls = sc[s]>=70?"high":sc[s]<45?"low":"";
+    const word = sc[s]>=70?"💪 Strength":sc[s]<45?"🌱 Could work on":"👍 Solid";
+    return `<div class="vcol">
+      <div class="vtrack ${cls}"><i data-h="${Math.max(sc[s],2)}"></i><b data-h="${sc[s]}" class="${sc[s]>=85?"inside":""}">${sc[s]}</b></div>
+      <div class="vname"><span class="ve">${SKILLS[s].e}</span><span class="long">${SKILLS[s].name}</span><span class="short">${SKILLS[s].short}</span></div>
+      <div class="vword">${word}</div></div>`;
+  }).join("");
+
+  const medals = ["🥇","🥈","🥉","4","5","6"];
+  const gapHtml = gaps.length ? `<div class="card">
+      <h2>🤷 What we couldn't match</h2>
+      <p class="muted">You asked for these, but nothing on our list covers them yet.</p>
+      ${gaps.map(g=>`<a class="gap" style="display:block;text-decoration:none;color:inherit;font-weight:400" href="${CS(g.label.replace(/^\S+\s/,""))}" target="_blank" rel="noopener"><b>${esc(g.label)}</b> — not on our list. Tap to search Coursera for it ↗</a>`).join("")}
+      <p class="small muted" style="margin-top:12px">Every "no match" is a signal: students want this, and nobody is pointing them to it yet.</p>
+    </div>` : "";
+
+  app.innerHTML = `<div class="results">
+    ${certbar()}
+
+    <div class="card">
+      <h2>🎉 Your skills</h2>
+      <div class="vchart"><div class="maxline"><span>100 = max 🚀</span></div>${chart}</div>
+    </div>
+
+    <div class="card">
+      <h2>🎯 Your Coursera picks</h2>
+      <div class="picks">${best.map((c,x)=>card(c,x,sc,medals[x])).join("")}</div>
+    </div>
+
+    <div class="card">
+      <h2>🏫 On campus at TXST</h2>
+      <div class="picks">${local.map((c,x)=>card(c,x,sc,"📍")).join("")}</div>
+      <div style="margin-top:18px">${browseAll()}</div>
+    </div>
+    ${gaps.length?`<div class="card"><h2>🤷 Not on our list yet</h2>
+      <div class="gapbtns">${gaps.map(g=>`<a class="btn ghost" href="${CS(g.label.replace(/^\S+\s/,""))}" target="_blank" rel="noopener">${esc(g.label)} 🔎</a>`).join("")}</div></div>`:""}
+    <div class="card">
+      <div class="pdfrow"><span class="pe">📄</span><b>Want a PDF of your top picks?</b><button class="btn" id="pdf">Make my PDF</button></div>
+      <div class="acts"><button class="btn ghost" id="copy">📋 Copy</button>
+      <button class="btn ghost" id="edit">✏️ Edit answers</button>
+      <button class="btn ghost" id="again">🔄 Restart</button><span class="toast" id="toast"></span></div>
+      <details>
+        <summary>For program staff</summary>
+        <p class="small" style="margin-top:8px">Texas State already pays for Coursera, but people have to go looking and guess which of thousands of courses fits. This tool flips that: a short self-check scores six skill areas, then points each person to the specific courses that fill their gap. It gives learners a personal reason to log in and enroll.</p>
+        <p class="small">It also shows demand. Each interest with no matching course is flagged, so collected at scale this becomes a list of what to add or promote next.</p>
+        <p class="small muted">Scores are self-reported: two questions per skill, averaged and scaled 0–100. The "+points" on each card are a simple estimate (up to +25 for a course's main skill, +15 for others), not measured results. Hours are rough estimates too; check each course page. Courses marked ✓ TXST were listed on TXST's Coursera page; the rest are on Coursera and should be checked against TXST's free catalog. 📜 = earns a certificate, 🏅 = earns a badge.</p>
+      </details>
+    </div>
+  </div>`;
+
+  // animations: bars grow upward, confetti falls
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    app.querySelectorAll(".vtrack i").forEach(b=>b.style.height=b.dataset.h+"%");
+    app.querySelectorAll(".vtrack b").forEach(b=>{ const v=+b.dataset.h; b.style.bottom = v>=85 ? `calc(${v}% - 30px)` : `calc(${v}% + 6px)`; });
+  }));
+  confetti();
+
+  wireBrowse();
+  document.getElementById("pdf").onclick = async ()=>{
+    track("pdf");
+    const t = document.getElementById("toast"), btn = document.getElementById("pdf");
+    const hex = x => [1,3,5].map(i=>parseInt(x.slice(i,i+2),16));
+    const item = c => { const s=c.builds[0], g=gain(c,s,sc);
+      return {name:c.name, url:c.url, rgb:hex(SKILL_COLOR[c.weakest][0]), soft:hex(SKILL_COLOR[c.weakest][1]),
+        meta:[c.by, hrsText(c), c.earns?"Earns a "+c.earns:"", g>0?`+${g} ${SKILLS[s].name}`:""].filter(Boolean).join("  ·  ")}; };
+    const data = {skills:order.map(s=>({name:SKILLS[s].name, score:sc[s], rgb:hex(SKILL_COLOR[s][0])})),
+                  coursera:best.map(item), txst:local.map(item)};
+    btn.disabled = true; t.textContent = "Making it…";
+    try{
+      const jsPDF = await loadJsPdf();
+      const doc = buildPdf(jsPDF, data), name = "my-top-picks.pdf";
+      if(window.claude && window.claude.use){                       // inside Claude: ask the viewer to save
+        const dl = await window.claude.use("downloads");
+        if(!dl){ t.textContent = "Can't save a file in this view."; }
+        else { await dl.save({filename:name, data:doc.output("blob")}); t.textContent = "Saved! ✅"; }
+      } else { doc.save(name); t.textContent = "Saved! ✅"; }          // normal website (GitHub Pages)
+    }catch(e){ t.textContent = e && e.code==="declined" ? "" : "Couldn't make the PDF. Try again."; }
+    btn.disabled = false;
+  };
+  document.getElementById("edit").onclick = ()=>go("quiz",0);
+  document.getElementById("again").onclick = ()=>{
+    state.answers.fill(null); state.role=null; state.certs=null; state.interests.clear(); go("home");
+  };
+  document.getElementById("copy").onclick = async ()=>{
+    const text = `My Bobcat Course Match results\n`
+      + order.map(s=>`${SKILLS[s].name}: ${sc[s]}/100`).join("\n")
+      + `\n\nCoursera picks:\n` + best.map(c=>`- ${c.name} (${c.by})`).join("\n")
+      + `\n\nTexas State in person:\n` + local.map(c=>`- ${c.name} (${c.by})`).join("\n")
+      + (gaps.length?`\n\nNo match found for: ${gaps.map(g=>g.label).join("; ")}`:"");
+    const t = document.getElementById("toast");
+    try{ await navigator.clipboard.writeText(text); t.textContent="Copied! ✅"; }
+    catch(e){ t.textContent="Couldn't copy — select the text instead."; }
+  };
+}
+
+/* ---- PDF of top picks ---- */
+function loadJsPdf(){
+  return new Promise((res,rej)=>{
+    if(window.jspdf) return res(window.jspdf.jsPDF);
+    const s = document.createElement("script");
+    s.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+    s.onload = ()=>window.jspdf ? res(window.jspdf.jsPDF) : rej(new Error("jsPDF missing"));
+    s.onerror = ()=>rej(new Error("jsPDF failed to load"));
+    document.head.appendChild(s);
+  });
+}
+function buildPdf(jsPDF, d){
+  const doc = new jsPDF({unit:"pt", format:"letter"}), W = 612, M = 48; let y;
+  doc.setFillColor(107,26,31); doc.rect(0,0,W,84,"F");
+  doc.setTextColor(255,255,255); doc.setFont("helvetica","bold"); doc.setFontSize(26); doc.text("My Top Picks", M, 44);
+  doc.setFont("helvetica","normal"); doc.setFontSize(12); doc.text("Bobcat Course Match  ·  Coursera is free with a TXST login", M, 66);
+  y = 112;
+  const h2 = t => { if(y>690){ doc.addPage(); y=60; } doc.setTextColor(107,26,31); doc.setFont("helvetica","bold"); doc.setFontSize(15); doc.text(t, M, y); y += 18; };
+  h2("My skills");
+  d.skills.forEach(s=>{
+    doc.setTextColor(42,31,28); doc.setFont("helvetica","normal"); doc.setFontSize(10.5); doc.text(s.name, M, y+8);
+    doc.setFillColor(239,227,216); doc.roundedRect(M+170, y, 300, 10, 5, 5, "F");
+    if(s.score>0){ doc.setFillColor(s.rgb[0],s.rgb[1],s.rgb[2]); doc.roundedRect(M+170, y, Math.max(3*s.score,10), 10, 5, 5, "F"); }
+    doc.setFont("helvetica","bold"); doc.text(String(s.score), M+480, y+8); y += 18;
+  });
+  y += 20;
+  const list = (title, items) => {
+    if(!items.length) return;
+    h2(title);
+    items.forEach((c,i)=>{
+      doc.setFont("helvetica","bold"); doc.setFontSize(12);
+      const lines = doc.splitTextToSize(c.name, W-2*M-52), hgt = lines.length*14 + 30;
+      if(y+hgt>762){ doc.addPage(); y = 60; }
+      doc.setFillColor(c.soft[0],c.soft[1],c.soft[2]); doc.roundedRect(M, y, W-2*M, hgt, 8, 8, "F");
+      doc.setFillColor(c.rgb[0],c.rgb[1],c.rgb[2]); doc.circle(M+18, y+18, 10, "F");
+      doc.setTextColor(255,255,255); doc.setFontSize(10); doc.text(String(i+1), M+18, y+21.5, {align:"center"});
+      doc.setTextColor(42,31,28); doc.setFontSize(12); doc.text(lines, M+36, y+19);
+      doc.setFont("helvetica","normal"); doc.setFontSize(9.5); doc.setTextColor(110,98,92);
+      doc.text(c.meta, M+36, y+19+lines.length*14);
+      doc.link(M, y, W-2*M, hgt, {url:c.url});
+      y += hgt + 6;
+    });
+    y += 8;
+  };
+  list("My Coursera picks", d.coursera);
+  list("On campus at TXST", d.txst);
+  if(y>770){ doc.addPage(); y = 60; }
+  doc.setTextColor(110,98,92); doc.setFont("helvetica","normal"); doc.setFontSize(9.5);
+  doc.text("Tap any course to open it. Log in free first at txst.edu/microcredentials", M, y+6);
+  return doc;
+}
+
+/* ---- page 2: every course in one table, with filters ---- */
+/* every filter can have several things picked at once.
+   Inside one filter it's "any of these"; across filters it's "all of these". */
+const F = {topic:new Set(), skill:new Set(), earns:new Set(), time:new Set(), where:new Set()};
+let openF = "";      // which dropdown is open right now
+function allPage(){
+  const cols = Object.keys(SKILLS);
+  const where = c => c.src==="coursera" ? "online" : "campus";
+  const ok = (k,v) => !F[k].size || F[k].has(v);
+  const match = c => (!F.topic.size || c.tags.some(t=>F.topic.has(t))) && (!F.skill.size || c.builds.some(s=>F.skill.has(s))) && ok("earns",c.earns||"none")
+                  && ok("time",hrsBucket(c)) && ok("where",where(c));
+  const shown = CATALOG.filter(match), groups = [];
+  shown.forEach(c=>{ let g=groups.find(x=>x.grp===c.grp); if(!g) groups.push(g={grp:c.grp,items:[]}); g.items.push(c); });
+  const dd = (k,emoji,word,opts) => `<details class="fdd ${F[k].size?"on":""}" data-k="${k}" ${openF===k?"open":""}>
+      <summary><span class="fe">${emoji}</span><span class="fw">${word}</span>${F[k].size?`<b>${F[k].size}</b>`:""}<span class="fv">▾</span></summary>
+      <div class="fpanel"><div class="fhead">${emoji} ${word}</div>${opts.map(o=>`<label><input type="checkbox" data-f="${k}" value="${o[0]}" ${F[k].has(o[0])?"checked":""}>${esc(o[1])}</label>`).join("")}<button class="btn fdone" type="button">Done ✓</button></div></details>`;
+  const anyOn = Object.values(F).some(s=>s.size);
+  const body = groups.map(g=>`<tr class="grp"><td colspan="${cols.length+2}">${esc(g.grp)}</td></tr>`
+    + g.items.map(c=>`<tr>
+        <td><div class="crow">
+          <a class="thumb" href="${c.url}" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true" style="--c:${SKILL_COLOR[c.builds[0]][0]};--soft:${SKILL_COLOR[c.builds[0]][1]}">${pic(c.pic)}${{badge:'<span class="tbadge">🏅</span>',certificate:'<span class="tbadge">📜</span>'}[c.earns]||""}</a>
+          <div class="ctext">
+            <a class="cname" href="${c.url}" target="_blank" rel="noopener"><span class="cart">${c.art||""} </span>${esc(c.name)} ↗</a>
+            <span class="sub">${esc(c.by)} · ⏱️ ${hrsText(c)}${c.who==="staff"?" · faculty & staff":c.who==="student"?" · students":""}${c.seen?" · ✓ TXST":""}</span>
+            <span class="mskills">${c.builds.map((s,i)=>`<span class="${i?"":"main"}">${SKILLS[s].e} ${SKILLS[s].short}</span>`).join("")}</span>
+          </div></div></td>
+        ${cols.map(s=>`<td>${c.builds[0]===s?'<span class="star" title="Main skill">⭐</span>':c.builds.includes(s)?'<span class="star s" title="Bonus skill">⭐</span>':""}</td>`).join("")}
+        <td class="earnc" title="${EARN[c.earns]?EARN[c.earns].slice(3):"No credential"}">${{badge:"🏅",certificate:"📜"}[c.earns]||"—"}</td></tr>`).join("")).join("");
+  app.innerHTML = `<div class="card allp">
+    <h2>🗂️ All courses</h2>
+    <div class="filters">
+      ${dd("topic","✨","Topic",INTERESTS.filter(t=>CATALOG.some(c=>c.tags.includes(t.id))).map(t=>[t.id,t.label]))}
+      ${dd("skill","💪","Skill",cols.map(s=>[s,SKILLS[s].e+" "+SKILLS[s].name]))}
+      ${dd("earns","🎁","Earn",[["certificate","📜 Certificate"],["badge","🏅 Badge"],["none","— Nothing"]])}
+      ${dd("time","⏱️","Time",HOURS.map(b=>[b[0],b[1]]))}
+      ${dd("where","📍","Where",[["online","💻 Online (Coursera)"],["campus","🏫 In person (San Marcos)"]])}
+    </div>
+    <div class="fmeta"><span class="fcount">${shown.length} of ${CATALOG.length} courses</span>
+      ${anyOn?'<button class="fclear" id="fclear">✖ Clear filters</button>':""}</div>
+    <div class="legend"><span><span class="star">⭐</span> Main skill</span><span><span class="star s">⭐</span> Bonus skill</span><span>📜 Certificate</span><span>🏅 Badge</span></div>
+    ${shown.length ? `<div class="tablewrap"><table class="grid">
+      <thead><tr><th>Course</th>${cols.map(s=>`<th><span class="the">${SKILLS[s].e}</span>${SKILLS[s].name}</th>`).join("")}<th><span class="the">🎁</span>You earn</th></tr></thead>
+      <tbody>${body}</tbody></table></div>` : `<div class="empty">🤷 Nothing matches. Try clearing a filter.</div>`}
+    <p style="margin-top:18px"><button class="btn" id="tomatch">🎯 My match</button></p>
+  </div>`;
+  app.querySelectorAll("input[data-f]").forEach(x=>x.onchange=()=>{
+    const set = F[x.dataset.f]; x.checked ? set.add(x.value) : set.delete(x.value);
+    openF = x.dataset.f; allPage();                       // keep this dropdown open so you can tick more
+  });
+  app.querySelectorAll(".fdd").forEach(d=>d.ontoggle=()=>{
+    if(!d.isConnected) return;                           // ignore dropdowns from an older render
+    document.body.classList.toggle("sheet-open", !!app.querySelector(".fdd[open]"));
+    if(d.open){ openF = d.dataset.k; app.querySelectorAll(".fdd").forEach(o=>{ if(o!==d) o.open=false; }); }
+    else if(openF===d.dataset.k) openF = "";
+  });
+  app.querySelectorAll(".fdone").forEach(b=>b.onclick=e=>{ e.preventDefault(); const d=b.closest(".fdd"); d.open=false; openF=""; document.body.classList.remove("sheet-open"); });
+  document.body.classList.toggle("sheet-open", !!app.querySelector(".fdd[open]"));
+  const fc = document.getElementById("fclear");
+  if(fc) fc.onclick = ()=>{ for(const k in F) F[k].clear(); openF=""; allPage(); };
+  document.getElementById("tomatch").onclick = ()=>setPage("survey");
+}
+/* count which courses people open (anonymous) */
+document.addEventListener("click", e=>{
+  const a = e.target.closest && e.target.closest("a.pick, .grid a.cname, .grid a.thumb");
+  if(!a) return;
+  const name = (a.querySelector("h3")||a.querySelector(".ctext .cname")||a).textContent || "";
+  const row = a.closest("tr"), n2 = row && row.querySelector(".cname");
+  track("open/" + (n2 ? n2.textContent : name).replace("↗","").trim().slice(0,80));
+});
+/* tapping anywhere else closes an open dropdown */
+document.addEventListener("click", e=>{
+  // a tap on the dim backdrop (on phones) lands on the dropdown itself, so close it then
+  if(e.target.closest && e.target.closest(".fdd") && !(e.target.classList && e.target.classList.contains("fdd"))) return;
+  document.querySelectorAll(".fdd[open]").forEach(d=>d.open=false); openF=""; document.body.classList.remove("sheet-open");
+});
+
+/* ---- switching between the two pages ---- */
+function setPage(p){
+  app.classList.remove("slide-r","slide-l"); void app.offsetWidth;
+  app.classList.add(p==="all" ? "slide-r" : "slide-l");      // new page slides in from the side
+  if(p==="all") track("view/all-courses");
+  if(state.page===p) return;
+  state.page = p;
+  try{ location.hash = p==="all" ? "all-credentials" : "survey"; }catch(e){}
+  render(true); window.scrollTo({top:0,behavior:"smooth"});
+}
+document.querySelectorAll(".navb").forEach(b=>b.onclick=()=>setPage(b.dataset.page));
+window.addEventListener("hashchange",()=>{
+  const p = location.hash==="#all-credentials" ? "all" : "survey";
+  if(p!==state.page){ state.page=p; render(true); }
+});
+if(location.hash==="#all-credentials") state.page="all";
+
+function confetti(){
+  if(window.matchMedia && matchMedia("(prefers-reduced-motion:reduce)").matches) return;
+  const colors=["#6b1a1f","#e8b44c","#f7c5c5","#3b8a64","#ffd9a8"];
+  for(let k=0;k<60;k++){
+    const c=document.createElement("span");
+    c.className="confetti";
+    c.style.left=Math.random()*100+"vw";
+    c.style.background=colors[k%colors.length];
+    c.style.animationDuration=(1.8+Math.random()*1.8)+"s";
+    c.style.animationDelay=(Math.random()*.6)+"s";
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),4500);
+  }
+}
+render(true);
+</script>
+</body>
+</html>
