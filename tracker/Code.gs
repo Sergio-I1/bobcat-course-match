@@ -13,7 +13,7 @@
  *      Execute as: Me.   Who has access: Anyone.   Click Deploy.
  *   4. Copy the Web app URL and paste it into TRACK_URL in index.html.
  *
- * What gets saved: time, event, detail (course name, interest...),
+ * What gets saved: date, event, detail (course name, interest...),
  * role picked in the quiz (student / staff), and phone vs computer.
  * No names, emails or IP addresses.
  */
@@ -52,7 +52,10 @@ function book_() {
 }
 function log_() { return book_().getSheetByName(LOG); }
 
-/* ---------- builds the pretty sheet (run once) ---------- */
+/* ---------- builds the pretty sheet ----------
+   Safe to run again: it rebuilds the Summary and By day tabs but never
+   deletes the rows already saved in "All events". */
+const DAY = "📅 By day";
 function setup() {
   const props = PropertiesService.getScriptProperties();
   let ss = props.getProperty("SHEET_ID") ? SpreadsheetApp.openById(props.getProperty("SHEET_ID")) : null;
@@ -60,23 +63,47 @@ function setup() {
     ss = SpreadsheetApp.create(TITLE);
     props.setProperty("SHEET_ID", ss.getId());
   }
+  const L = `'${LOG}'`, D = `'${DAY}'`;
 
-  // --- All events (the raw log) ---
+  // --- All events (the raw log). Only the header and formats are touched. ---
   let log = ss.getSheetByName(LOG) || ss.insertSheet(LOG);
-  log.clear();
-  log.getRange("A1:E1").setValues([["When", "Event", "Detail", "Role", "Device"]])
+  log.getRange("A1:F1").setValues([["Date", "Event", "Detail", "Role", "Device", "Day"]])
      .setBackground(MAROON).setFontColor("white").setFontWeight("bold");
+  log.getRange("F1").setFormula('={"Day";ARRAYFORMULA(IF(A2:A="",,INT(A2:A)))}');
   log.setFrozenRows(1);
-  log.setColumnWidths(1, 1, 160); log.setColumnWidth(2, 110); log.setColumnWidth(3, 380);
+  log.setColumnWidth(1, 130); log.setColumnWidth(2, 110); log.setColumnWidth(3, 380);
   log.setColumnWidth(4, 90); log.setColumnWidth(5, 90);
-  log.getRange("A2:A").setNumberFormat("mmm d, h:mm am/pm");
+  log.getRange("A2:A").setNumberFormat("ddd, mmm d, yyyy");      // days, no hours
+  log.getRange("F2:F").setNumberFormat("yyyy-mm-dd");
+  log.hideColumns(6);                                            // helper column for the day counts
   log.getBandings().forEach(b => b.remove());
-  log.getRange("A1:E1000").applyRowBanding(SpreadsheetApp.BandingTheme.LIGHT_GREY, true, false);
-  log.getRange("A1:E1").setBackground(MAROON).setFontColor("white");
+  log.getRange("A1:E2000").applyRowBanding(SpreadsheetApp.BandingTheme.LIGHT_GREY, true, false);
+  log.getRange("A1:F1").setBackground(MAROON).setFontColor("white");
+
+  // --- By day: one row per day, counts per column ---
+  let day = ss.getSheetByName(DAY) || ss.insertSheet(DAY, 1);
+  day.clear();
+  day.getRange("A1:F1").setValues([["Day", "Visits", "Started quiz", "Finished quiz", "Course clicks", "PDFs + copies"]])
+     .setBackground(MAROON).setFontColor("white").setFontWeight("bold").setHorizontalAlignment("center");
+  day.getRange("A2").setFormula(`=IFERROR(SORT(UNIQUE(FILTER(${L}!F2:F,${L}!F2:F<>""))),)`);
+  const count = (col, crit) => day.getRange(col + "2").setFormula(
+    `=ARRAYFORMULA(IF(A2:A="",,COUNTIFS(${L}!F:F,A2:A,${L}!B:B,"${crit}")))`);
+  count("B", "visit"); count("C", "start"); count("D", "finished"); count("E", "open");
+  day.getRange("F2").setFormula(
+    `=ARRAYFORMULA(IF(A2:A="",,COUNTIFS(${L}!F:F,A2:A,${L}!B:B,"pdf")+COUNTIFS(${L}!F:F,A2:A,${L}!B:B,"copy")))`);
+  day.getRange("A2:A").setNumberFormat("ddd, mmm d");
+  day.getRange("B2:F").setHorizontalAlignment("center");
+  day.setFrozenRows(1);
+  day.setColumnWidth(1, 140); for (let c = 2; c <= 6; c++) day.setColumnWidth(c, 120);
+  day.getBandings().forEach(b => b.remove());
+  day.getRange("A1:F400").applyRowBanding(SpreadsheetApp.BandingTheme.LIGHT_GREY, true, false);
+  day.getRange("A1:F1").setBackground(MAROON).setFontColor("white");
 
   // --- Summary ---
   let sum = ss.getSheetByName(SUM) || ss.insertSheet(SUM, 0);
-  sum.clear(); sum.getCharts().forEach(c => sum.removeChart(c));
+  sum.getCharts().forEach(c => sum.removeChart(c));
+  sum.getRange("A1:K200").breakApart();
+  sum.clear();
   sum.setHiddenGridlines(true);
   sum.getRange("A1:H200").setFontFamily("Nunito").setFontSize(11);
   sum.getRange("A1:H1").merge().setValue("🐾 Bobcat Course Match — Traffic")
@@ -85,7 +112,6 @@ function setup() {
      .setFontColor("#7a6c66").setBackground(CREAM);
   sum.setRowHeight(1, 44);
 
-  const L = `'${LOG}'`;
   const cards = [
     ["👀 Visits",              `=COUNTIF(${L}!B:B,"visit")`],
     ["🚀 Started quiz",         `=COUNTIF(${L}!B:B,"start")`],
@@ -93,7 +119,7 @@ function setup() {
     ["🎒 Finished — students",  `=COUNTIFS(${L}!B:B,"finished",${L}!C:C,"student")`],
     ["🏫 Finished — faculty/staff", `=COUNTIFS(${L}!B:B,"finished",${L}!C:C,"staff")`],
     ["🖱️ Course clicks",        `=COUNTIF(${L}!B:B,"open")`],
-    ["📄 PDFs made",            `=COUNTIF(${L}!B:B,"pdf")`],
+    ["📄 Saved (PDF or copy)",  `=COUNTIF(${L}!B:B,"pdf")+COUNTIF(${L}!B:B,"copy")`],
     ["🗂️ Opened All courses",   `=COUNTIF(${L}!B:B,"view")`],
     ["📱 Phone visits",         `=COUNTIFS(${L}!B:B,"visit",${L}!E:E,"phone")`],
     ["✅ Finish rate",          `=IFERROR(B7/B6,0)`]
@@ -103,43 +129,49 @@ function setup() {
   sum.getRange(5 + cards.length - 1, 2).setNumberFormat("0%");
   styleTable_(sum, 4, 1, cards.length, 2);
 
-  const tables = [
-    ["🖱️ Most-clicked courses", "open",     "Course",   "Clicks"],
-    ["✨ What students want to learn", "interest", "Topic", "Picks"],
-    ["🤷 Asked for, but no match yet", "no-match", "Topic", "Picks"]
-  ];
-  let col = 4;
-  tables.forEach(([title, ev, head, count]) => {
-    sum.getRange(4, col).setValue(title);
-    sum.getRange(5, col).setFormula(
-      `=IFERROR(QUERY(${L}!B:C,"select C, count(C) where B = '${ev}' group by C order by count(C) desc label C '${head}', count(C) '${count}'",0),"—")`);
-    styleTable_(sum, 4, col, 15, 2, true);
-    col += 3;
-  });
-  // Visits per day
-  sum.getRange(20, 1).setValue("📅 Visits per day");
-  sum.getRange(21, 1).setFormula(
-    `=IFERROR(QUERY(${L}!A:B,"select toDate(A), count(B) where B = 'visit' group by toDate(A) order by toDate(A) label toDate(A) 'Day', count(B) 'Visits'",1),"—")`);
-  sum.getRange("A22:A60").setNumberFormat("mmm d");
-  styleTable_(sum, 20, 1, 30, 2, true);
+  const query = (ev, head, cnt) =>
+    `=IFERROR(QUERY(${L}!B:C,"select C, count(C) where B = '${ev}' group by C order by count(C) desc label C '${head}', count(C) '${cnt}'",0),"—")`;
+  sum.getRange(4, 4).setValue("🖱️ Most-clicked courses");
+  sum.getRange(5, 4).setFormula(query("open", "Course", "Clicks"));
+  styleTable_(sum, 4, 4, 15, 2, true);
+  sum.getRange(4, 7).setValue("✨ What students want to learn");
+  sum.getRange(5, 7).setFormula(query("interest", "Topic", "Picks"));
+  styleTable_(sum, 4, 7, 15, 2, true);
+  sum.getRange(21, 1).setValue("🤷 Asked for, but no match yet");
+  sum.getRange(22, 1).setFormula(query("no-match", "Topic", "Picks"));
+  styleTable_(sum, 21, 1, 15, 2, true);
 
   sum.setColumnWidth(1, 210); sum.setColumnWidth(2, 80); sum.setColumnWidth(3, 20);
   sum.setColumnWidth(4, 330); sum.setColumnWidth(5, 70); sum.setColumnWidth(6, 20);
   sum.setColumnWidth(7, 260); sum.setColumnWidth(8, 70);
-  // the third table sits under the second one so the sheet stays easy to read
-  sum.getRange(4, 10, 17, 2).moveTo(sum.getRange(20, 4));
 
-  // Chart: most-clicked courses
-  const chart = sum.newChart().asBarChart()
+  // Trend: visits, started, finished and course clicks per day
+  const trend = sum.newChart().asLineChart()
+    .addRange(day.getRange("A1:E400"))
+    .setNumHeaders(1)
+    .setOption("title", "📈 Day by day")
+    .setOption("colors", [MAROON, GOLD, "#3b8a64", "#2f6fe0"])
+    .setOption("legend", { position: "bottom" })
+    .setOption("pointSize", 6)
+    .setOption("curveType", "function")
+    .setOption("vAxis", { minValue: 0, format: "0" })
+    .setOption("hAxis", { format: "MMM d" })
+    .setOption("width", 760).setOption("height", 330)
+    .setPosition(21, 4, 0, 0).build();
+  sum.insertChart(trend);
+
+  // Bar chart: most-clicked courses
+  const bars = sum.newChart().asBarChart()
     .addRange(sum.getRange("D6:E15"))
-    .setOption("title", "Most-clicked courses")
+    .setOption("title", "🖱️ Most-clicked courses")
     .setOption("colors", [MAROON])
     .setOption("legend", { position: "none" })
-    .setPosition(20, 7, 0, 0).build();
-  sum.insertChart(chart);
+    .setOption("width", 760).setOption("height", 300)
+    .setPosition(40, 4, 0, 0).build();
+  sum.insertChart(bars);
 
   // clean up the default empty tab
-  const extra = ss.getSheetByName("Sheet1"); if (extra && ss.getSheets().length > 2) ss.deleteSheet(extra);
+  const extra = ss.getSheetByName("Sheet1"); if (extra && ss.getSheets().length > 3) ss.deleteSheet(extra);
   ss.setActiveSheet(sum);
 
   Logger.log("Sheet ready: " + ss.getUrl());
