@@ -160,7 +160,8 @@ function setup() {
     .setOption("pointSize", 7)
     .setOption("lineWidth", 3)
     .setOption("vAxis", { title: "Clicks", minValue: 0, format: "0" })
-    .setOption("hAxis", { title: "Date", format: "MMM d" })
+    .setOption("treatLabelsAsText", true)
+    .setOption("hAxis", { title: "Date", format: "ddd, MMM d", showTextEvery: 1, slantedText: true, slantedTextAngle: 30 })
     .setOption("width", 760).setOption("height", 320)
     .setPosition(21, 4, 0, 0).build();
   sum.insertChart(clicks);
@@ -174,7 +175,8 @@ function setup() {
     .setOption("legend", { position: "bottom" })
     .setOption("pointSize", 6)
     .setOption("curveType", "function")
-    .setOption("hAxis", { title: "Date", format: "MMM d" })
+    .setOption("treatLabelsAsText", true)
+    .setOption("hAxis", { title: "Date", format: "ddd, MMM d", showTextEvery: 1, slantedText: true, slantedTextAngle: 30 })
     .setOption("vAxis", { title: "Count", minValue: 0, format: "0" })
     .setOption("width", 760).setOption("height", 330)
     .setPosition(39, 4, 0, 0).build();
