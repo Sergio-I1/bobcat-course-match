@@ -85,7 +85,8 @@ function setup() {
   day.clear();
   day.getRange("A1:F1").setValues([["Day", "Visits", "Started quiz", "Finished quiz", "Course clicks", "PDFs + copies"]])
      .setBackground(MAROON).setFontColor("white").setFontWeight("bold").setHorizontalAlignment("center");
-  day.getRange("A2").setFormula(`=IFERROR(SORT(UNIQUE(FILTER(${L}!F2:F,${L}!F2:F<>""))),)`);
+  // every day from the first event through today, including days with 0 (a new row appears each day)
+  day.getRange("A2").setFormula(`=IFERROR(SEQUENCE(TODAY()-MIN(${L}!F2:F)+1,1,MIN(${L}!F2:F)),)`);
   const count = (col, crit) => day.getRange(col + "2").setFormula(
     `=ARRAYFORMULA(IF(A2:A="",,COUNTIFS(${L}!F:F,A2:A,${L}!B:B,"${crit}")))`);
   count("B", "visit"); count("C", "start"); count("D", "finished"); count("E", "open");
@@ -98,6 +99,9 @@ function setup() {
   day.getBandings().forEach(b => b.remove());
   day.getRange("A1:F400").applyRowBanding(SpreadsheetApp.BandingTheme.LIGHT_GREY, true, false);
   day.getRange("A1:F1").setBackground(MAROON).setFontColor("white");
+
+  // recalculate every hour so "today" rolls over even if nobody opens the sheet
+  ss.setRecalculationInterval(SpreadsheetApp.RecalculationInterval.HOUR);
 
   // --- Summary ---
   let sum = ss.getSheetByName(SUM) || ss.insertSheet(SUM, 0);
